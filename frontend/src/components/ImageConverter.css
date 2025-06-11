@@ -1,0 +1,57 @@
+.image-converter {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.converter-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.upload-section,
+.options-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.convert-section {
+  text-align: center;
+}
+
+.convert-btn {
+  font-size: 1.125rem;
+  padding: 1rem 2rem;
+  min-width: 200px;
+}
+
+.error-message {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  color: var(--error-color);
+  text-align: center;
+}
+
+[data-theme='dark'] .error-message {
+  background-color: #450a0a;
+  border-color: #7f1d1d;
+}
+
+@media (max-width: 768px) {
+  .converter-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .convert-btn {
+    font-size: 1rem;
+    padding: 0.875rem 1.5rem;
+    min-width: auto;
+    width: 100%;
+  }
+}

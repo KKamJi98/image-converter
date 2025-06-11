@@ -1,0 +1,14 @@
+apiVersion: v2
+name: image-converter
+description: Image conversion service with React frontend and FastAPI backend
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - image
+  - converter
+  - fastapi
+  - react
+maintainers:
+  - name: Image Converter Team
+    email: team@example.com
