@@ -21,16 +21,14 @@ RUN pip install poetry
 # Poetry 설정
 ENV POETRY_NO_INTERACTION=1 \
     POETRY_VENV_IN_PROJECT=1 \
-    POETRY_CACHE_DIR=/tmp/poetry_cache
-
-# 의존성 파일과 README 복사
-COPY pyproject.toml poetry.lock README.md ./
-
-# 의존성 설치
-RUN poetry install --only=main && rm -rf $POETRY_CACHE_DIR
+    POETRY_CACHE_DIR=/tmp/poetry_cache \
+    PYTHONPATH=/app
 
 # 애플리케이션 코드 복사
 COPY . .
+
+# 의존성 설치
+RUN poetry install --only=main && rm -rf $POETRY_CACHE_DIR
 
 # 포트 노출
 EXPOSE 8000
