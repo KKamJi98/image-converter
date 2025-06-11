@@ -19,9 +19,9 @@
 │   React SPA     │    │   FastAPI       │
 │   (Frontend)    │◄──►│   (Backend)     │
 │                 │    │                 │
-│ • TypeScript    │    │ • Python 3.12  │
+│ • TypeScript    │    │ • Python 3.12+ │
 │ • Zustand       │    │ • PIL/Pillow    │
-│ • Tailwind CSS  │    │ • Pydantic      │
+│ • Tailwind CSS  │    │ • Pydantic v2   │
 └─────────────────┘    └─────────────────┘
 ```
 
@@ -37,14 +37,14 @@
 ### Backend
 - **FastAPI** - 웹 프레임워크
 - **Pillow (PIL)** - 이미지 처리
-- **Pydantic** - 데이터 검증
+- **Pydantic v2** - 데이터 검증
 - **Poetry** - 의존성 관리
 
 ### DevOps
-- **Docker** + **Docker Compose**
+- **Podman** - 컨테이너 런타임 (로컬 개발)
 - **Kubernetes** + **Helm**
 - **GitHub Actions** - CI/CD
-- **Nginx** - 리버스 프록시
+- **Harbor** - 컨테이너 레지스트리
 
 ## 🚀 빠른 시작
 
@@ -52,7 +52,7 @@
 - Python 3.12+
 - Node.js 20+
 - Poetry
-- Docker (선택사항)
+- Podman (컨테이너 런타임)
 
 ### 로컬 개발
 
@@ -81,14 +81,14 @@ npm start
 - Backend API: http://localhost:8000
 - API 문서: http://localhost:8000/docs
 
-### Docker로 실행
+### Podman으로 실행
 
 ```bash
 # 전체 스택 실행
-docker-compose up --build
+podman-compose up --build
 
 # 백그라운드 실행
-docker-compose up -d --build
+podman-compose up -d --build
 ```
 
 ## 🧪 테스트
@@ -121,17 +121,23 @@ npm run format:check
 ## 📦 배포
 
 ### Kubernetes 배포
+
+#### 개발/테스트 환경
 ```bash
-# Helm 차트로 배포
+# 기본 values.yaml 사용
+helm install image-converter ./infra/helm-chart
+```
+
+#### 프로덕션 환경
+```bash
+# kkamji_values.yaml 사용
 helm install image-converter ./infra/helm-chart \
-  --set global.imageRegistry=your-registry.com \
-  --set ingress.hosts[0].host=your-domain.com
+  -f ./infra/helm-chart/kkamji_values.yaml
 ```
 
 ### 환경별 설정
-- **개발**: `values/dev.yaml`
-- **스테이징**: `values/staging.yaml`
-- **프로덕션**: `values/prod.yaml`
+- **개발/테스트**: `values.yaml` (example 기본값)
+- **프로덕션**: `kkamji_values.yaml` (실제 배포용)
 
 ## 🔧 설정
 
@@ -142,6 +148,12 @@ helm install image-converter ./infra/helm-chart \
 
 #### Frontend
 - `REACT_APP_API_URL`: 백엔드 API URL (기본값: `http://localhost:8000`)
+
+### 도메인 설정
+
+#### 프로덕션 환경
+- **Harbor 레지스트리**: harbor.kkamji.net
+- **서비스 도메인**: image-converter.kkamji.net
 
 ## 📝 API 문서
 
@@ -180,6 +192,4 @@ helm install image-converter ./infra/helm-chart \
 
 ## 📞 지원
 
-- 📧 Email: support@example.com
-- 💬 Discord: [커뮤니티 링크]
-- 📖 Wiki: [문서 링크]
+- 📧 Email: rlaxowl5460@gmail.com
