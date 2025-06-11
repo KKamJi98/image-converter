@@ -4,13 +4,17 @@ import App from './App';
 
 test('renders image converter title', () => {
   render(<App />);
-  const titleElement = screen.getByText(/Image Converter/i);
+  const titleElement = screen.getByRole('heading', {
+    name: /Image Converter/i,
+  });
   expect(titleElement).toBeInTheDocument();
 });
 
 test('renders upload section', () => {
   render(<App />);
-  const uploadText = screen.getByText(/이미지를 드래그하거나 클릭하여 선택하세요/i);
+  const uploadText = screen.getByText(
+    /이미지를 드래그하거나 클릭하여 선택하세요/i
+  );
   expect(uploadText).toBeInTheDocument();
 });
 
