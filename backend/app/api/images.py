@@ -10,8 +10,8 @@ from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 from PIL import Image
 
-from app.services.image_converter import ImageConverter
 from app.models.image_models import ConversionRequest, ConversionResponse
+from app.services.image_converter import ImageConverter
 
 router = APIRouter()
 converter = ImageConverter()
@@ -28,7 +28,7 @@ async def convert_image(
 ):
     """
     이미지 변환 API
-    
+
     Args:
         file: 업로드할 이미지 파일
         target_format: 변환할 형식 (webp, jpeg, png, jpg)
@@ -39,11 +39,11 @@ async def convert_image(
     """
     if not file.content_type or not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Invalid image file")
-    
+
     try:
         # 이미지 파일 읽기
         image_data = await file.read()
-        
+
         # 변환 요청 객체 생성
         request = ConversionRequest(
             target_format=target_format.lower(),
@@ -52,10 +52,10 @@ async def convert_image(
             max_size_mb=max_size_mb,
             quality=quality,
         )
-        
+
         # 이미지 변환 수행
         converted_data, metadata = await converter.convert_image(image_data, request)
-        
+
         # 변환된 이미지를 스트림으로 반환
         return StreamingResponse(
             io.BytesIO(converted_data),
@@ -67,9 +67,11 @@ async def convert_image(
                 "X-Compression-Ratio": str(metadata.compression_ratio),
             },
         )
-        
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Image conversion failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Image conversion failed: {str(e)}"
+        )
 
 
 @router.get("/formats")
