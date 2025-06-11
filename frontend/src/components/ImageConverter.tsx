@@ -23,26 +23,32 @@ export const ImageConverter: React.FC = () => {
     if (!selectedFile) return;
 
     setError(null);
-    setProgress({ isConverting: true, progress: 0, message: '변환 준비 중...' });
+    setProgress({
+      isConverting: true,
+      progress: 0,
+      message: '변환 준비 중...',
+    });
 
     try {
       setProgress({ progress: 25, message: '이미지 업로드 중...' });
-      
+
       const result = await convertImage(selectedFile, conversionOptions);
-      
+
       setProgress({ progress: 75, message: '변환 완료 처리 중...' });
-      
+
       // Blob URL 생성
       const url = URL.createObjectURL(result);
       setConvertedImageUrl(url);
-      
-      setProgress({ 
-        isConverting: false, 
-        progress: 100, 
-        message: '변환이 완료되었습니다!' 
+
+      setProgress({
+        isConverting: false,
+        progress: 100,
+        message: '변환이 완료되었습니다!',
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : '변환 중 오류가 발생했습니다.');
+      setError(
+        err instanceof Error ? err.message : '변환 중 오류가 발생했습니다.'
+      );
       setProgress({ isConverting: false, progress: 0, message: '' });
     }
   };
@@ -55,7 +61,7 @@ export const ImageConverter: React.FC = () => {
         <div className="upload-section">
           <FileUpload />
         </div>
-        
+
         <div className="options-section">
           <ConversionOptions />
         </div>
@@ -74,7 +80,7 @@ export const ImageConverter: React.FC = () => {
       )}
 
       {progress.isConverting && <ConversionProgress />}
-      
+
       {error && (
         <div className="error-message">
           <p>{error}</p>

@@ -5,7 +5,8 @@ import { useImageStore } from '../stores/imageStore';
 import './FileUpload.css';
 
 export const FileUpload: React.FC = () => {
-  const { selectedFile, setSelectedFile, setConvertedImageUrl, setError } = useImageStore();
+  const { selectedFile, setSelectedFile, setConvertedImageUrl, setError } =
+    useImageStore();
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
@@ -45,7 +46,7 @@ export const FileUpload: React.FC = () => {
   return (
     <div className="file-upload card">
       <h3 className="section-title">이미지 업로드</h3>
-      
+
       {!selectedFile ? (
         <div
           {...getRootProps()}
@@ -80,7 +81,7 @@ export const FileUpload: React.FC = () => {
               <X size={20} />
             </button>
           </div>
-          
+
           {selectedFile.type.startsWith('image/') && (
             <div className="file-preview">
               <img

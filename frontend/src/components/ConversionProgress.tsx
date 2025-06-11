@@ -11,14 +11,14 @@ export const ConversionProgress: React.FC = () => {
         <h3 className="progress-title">변환 진행 상황</h3>
         <span className="progress-percentage">{progress.progress}%</span>
       </div>
-      
+
       <div className="progress-bar">
-        <div 
+        <div
           className="progress-fill"
           style={{ width: `${progress.progress}%` }}
         />
       </div>
-      
+
       {progress.message && (
         <p className="progress-message">{progress.message}</p>
       )}

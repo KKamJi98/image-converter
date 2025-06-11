@@ -15,19 +15,19 @@ export const convertImage = async (
   const formData = new FormData();
   formData.append('file', file);
   formData.append('target_format', options.targetFormat);
-  
+
   if (options.maxWidth) {
     formData.append('max_width', options.maxWidth.toString());
   }
-  
+
   if (options.maxHeight) {
     formData.append('max_height', options.maxHeight.toString());
   }
-  
+
   if (options.maxSizeMb) {
     formData.append('max_size_mb', options.maxSizeMb.toString());
   }
-  
+
   if (options.quality) {
     formData.append('quality', options.quality.toString());
   }
@@ -48,10 +48,12 @@ export const convertImage = async (
       } else if (error.response?.status === 500) {
         throw new Error('서버에서 이미지 변환 중 오류가 발생했습니다.');
       } else if (error.code === 'ECONNABORTED') {
-        throw new Error('요청 시간이 초과되었습니다. 파일 크기를 확인해주세요.');
+        throw new Error(
+          '요청 시간이 초과되었습니다. 파일 크기를 확인해주세요.'
+        );
       }
     }
-    
+
     throw new Error('이미지 변환 중 오류가 발생했습니다.');
   }
 };

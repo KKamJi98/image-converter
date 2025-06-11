@@ -17,9 +17,7 @@ function App() {
         <div className="container">
           <div className="header-content">
             <h1 className="app-title">Image Converter</h1>
-            <p className="app-subtitle">
-              이미지 형식 변환 및 최적화 도구
-            </p>
+            <p className="app-subtitle">이미지 형식 변환 및 최적화 도구</p>
             <ThemeToggle />
           </div>
         </div>

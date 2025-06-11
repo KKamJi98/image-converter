@@ -20,7 +20,7 @@ interface ImageState {
   progress: ConversionProgress;
   convertedImageUrl: string | null;
   error: string | null;
-  
+
   setSelectedFile: (file: File | null) => void;
   setConversionOptions: (options: Partial<ConversionOptions>) => void;
   setProgress: (progress: Partial<ConversionProgress>) => void;
@@ -46,22 +46,22 @@ const initialState = {
 
 export const useImageStore = create<ImageState>((set) => ({
   ...initialState,
-  
+
   setSelectedFile: (file) => set({ selectedFile: file }),
-  
+
   setConversionOptions: (options) =>
     set((state) => ({
       conversionOptions: { ...state.conversionOptions, ...options },
     })),
-  
+
   setProgress: (progress) =>
     set((state) => ({
       progress: { ...state.progress, ...progress },
     })),
-  
+
   setConvertedImageUrl: (url) => set({ convertedImageUrl: url }),
-  
+
   setError: (error) => set({ error }),
-  
+
   reset: () => set(initialState),
 }));

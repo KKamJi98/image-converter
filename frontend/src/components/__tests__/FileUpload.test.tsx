@@ -14,17 +14,19 @@ jest.mock('../../stores/imageStore', () => ({
 
 test('renders file upload dropzone', () => {
   render(<FileUpload />);
-  
-  const uploadText = screen.getByText(/이미지를 드래그하거나 클릭하여 선택하세요/i);
+
+  const uploadText = screen.getByText(
+    /이미지를 드래그하거나 클릭하여 선택하세요/i
+  );
   expect(uploadText).toBeInTheDocument();
-  
+
   const supportText = screen.getByText(/PNG, JPG, JPEG, WebP, BMP, TIFF 지원/i);
   expect(supportText).toBeInTheDocument();
 });
 
 test('renders upload title', () => {
   render(<FileUpload />);
-  
+
   const title = screen.getByText(/이미지 업로드/i);
   expect(title).toBeInTheDocument();
 });

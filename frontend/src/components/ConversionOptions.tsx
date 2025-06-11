@@ -26,7 +26,7 @@ export const ConversionOptions: React.FC = () => {
   return (
     <div className="conversion-options card">
       <h3 className="section-title">변환 옵션</h3>
-      
+
       <div className="option-group">
         <label className="option-label">출력 형식</label>
         <div className="format-buttons">

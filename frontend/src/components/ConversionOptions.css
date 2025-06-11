@@ -128,7 +128,7 @@
   .format-buttons {
     grid-template-columns: repeat(4, 1fr);
   }
-  
+
   .size-inputs {
     flex-direction: column;
     gap: 0.75rem;

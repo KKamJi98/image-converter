@@ -82,11 +82,11 @@
     gap: 1rem;
     align-items: stretch;
   }
-  
+
   .result-actions {
     justify-content: center;
   }
-  
+
   .result-info {
     grid-template-columns: 1fr;
   }
