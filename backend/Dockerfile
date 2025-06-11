@@ -23,8 +23,8 @@ ENV POETRY_NO_INTERACTION=1 \
     POETRY_VENV_IN_PROJECT=1 \
     POETRY_CACHE_DIR=/tmp/poetry_cache
 
-# 의존성 파일 복사
-COPY pyproject.toml poetry.lock ./
+# 의존성 파일과 README 복사
+COPY pyproject.toml poetry.lock README.md ./
 
 # 의존성 설치
 RUN poetry install --only=main && rm -rf $POETRY_CACHE_DIR
