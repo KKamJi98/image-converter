@@ -2,9 +2,10 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# 시스템 의존성 설치
+# 시스템 의존성 설치 (curl 추가)
 RUN apt-get update && apt-get install -y \
     gcc \
+    curl \
     libjpeg-dev \
     zlib1g-dev \
     libfreetype6-dev \
@@ -24,14 +25,21 @@ ENV POETRY_NO_INTERACTION=1 \
     POETRY_CACHE_DIR=/tmp/poetry_cache \
     PYTHONPATH=/app
 
+# 의존성 파일들 복사
+COPY pyproject.toml poetry.lock* ./
+
 # 애플리케이션 코드 복사
 COPY . .
 
-# 의존성 설치
+# 의존성 설치 (전체 프로젝트 포함)
 RUN poetry install --only=main && rm -rf $POETRY_CACHE_DIR
 
 # 포트 노출
 EXPOSE 8000
+
+# 헬스체크 추가 (더 긴 시작 대기 시간)
+HEALTHCHECK --interval=15s --timeout=10s --start-period=45s --retries=5 \
+    CMD curl -f http://localhost:8000/health || exit 1
 
 # 애플리케이션 실행
 CMD ["poetry", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -27,11 +27,29 @@ log_warning() {
 
 log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
+    cleanup_on_error
     exit 1
 }
 
-# 타임아웃 설정 (1분)
+# 에러 발생 시 정리 함수
+cleanup_on_error() {
+    log_info "에러 발생으로 인한 정리 작업 중..."
+    
+    # 실행 중인 컨테이너 정리
+    if [ -n "$COMPOSE_CMD" ] && [ -f "$COMPOSE_FILE" ]; then
+        $COMPOSE_CMD -f $COMPOSE_FILE down 2>/dev/null || true
+    fi
+    
+    # 테스트 이미지 정리
+    if [ -n "$CONTAINER_CMD" ]; then
+        $CONTAINER_CMD rmi localhost/image-converter-backend:test localhost/image-converter-frontend:test 2>/dev/null || true
+    fi
+}
+
+# 타임아웃 설정
 TIMEOUT=60
+BUILD_TIMEOUT=300
+HEALTH_TIMEOUT=60
 
 # 1. Backend 테스트
 log_info "Backend 테스트 시작..."
@@ -42,7 +60,7 @@ if command -v poetry &> /dev/null; then
     poetry install || log_error "Backend 의존성 설치 실패"
     
     log_info "Backend 테스트 실행 중..."
-    timeout $TIMEOUT poetry run pytest -v || log_error "Backend 테스트 실패"
+    timeout $TIMEOUT poetry run pytest -v --tb=short || log_error "Backend 테스트 실패"
     
     log_info "Backend 코드 포맷팅 검사 중..."
     timeout $TIMEOUT poetry run black --check . || log_error "Backend 코드 포맷팅 검사 실패"
@@ -63,11 +81,11 @@ if command -v npm &> /dev/null; then
     log_info "NPM 의존성 확인 중..."
     if [ ! -d "node_modules" ]; then
         log_info "NPM 의존성 설치 중..."
-        timeout 180 npm install || log_error "Frontend 의존성 설치 실패"
+        timeout 180 npm ci || log_error "Frontend 의존성 설치 실패"
     fi
     
     log_info "Frontend 테스트 실행 중..."
-    CI=true timeout $TIMEOUT npm test || log_error "Frontend 테스트 실패"
+    timeout $TIMEOUT npm run test:ci || log_error "Frontend 테스트 실패"
     
     log_info "Frontend 린팅 검사 중..."
     timeout $TIMEOUT npm run lint || log_error "Frontend 린트 검사 실패"
@@ -96,10 +114,10 @@ fi
 
 if [ -n "$CONTAINER_CMD" ]; then
     log_info "Backend 컨테이너 이미지 빌드 중..."
-    timeout 300 $CONTAINER_CMD build -t localhost/image-converter-backend:test ./backend || log_error "Backend 컨테이너 빌드 실패"
+    timeout $BUILD_TIMEOUT $CONTAINER_CMD build -t localhost/image-converter-backend:test ./backend || log_error "Backend 컨테이너 빌드 실패"
     
     log_info "Frontend 컨테이너 이미지 빌드 중..."
-    timeout 300 $CONTAINER_CMD build -t localhost/image-converter-frontend:test ./frontend || log_error "Frontend 컨테이너 빌드 실패"
+    timeout $BUILD_TIMEOUT $CONTAINER_CMD build -t localhost/image-converter-frontend:test ./frontend || log_error "Frontend 컨테이너 빌드 실패"
     
     log_success "컨테이너 빌드 완료"
     
@@ -107,6 +125,7 @@ if [ -n "$CONTAINER_CMD" ]; then
     log_info "E2E 테스트 시작..."
     
     COMPOSE_CMD=""
+    COMPOSE_FILE=""
     if command -v podman-compose &> /dev/null; then
         COMPOSE_CMD="podman-compose"
         COMPOSE_FILE="podman-compose.yml"
@@ -122,22 +141,56 @@ if [ -n "$CONTAINER_CMD" ]; then
         log_info "서비스 시작 중..."
         $COMPOSE_CMD -f $COMPOSE_FILE up -d --build || log_error "컨테이너 서비스 실행 실패"
         
-        # 서비스 준비 대기
+        # 서비스 준비 대기 (더 긴 대기 시간과 헬스체크)
         log_info "서비스 준비 대기 중..."
-        sleep 30
+        sleep 15
+        
+        # 백엔드 서비스 준비 확인
+        for i in {1..20}; do
+            if $CONTAINER_CMD ps --format "table {{.Names}}\t{{.Status}}" | grep -q "Up"; then
+                log_info "컨테이너가 실행 중입니다. 서비스 준비 확인 중... ($i/20)"
+                if command -v curl &> /dev/null; then
+                    if timeout 10 curl -f http://localhost:8000/health &>/dev/null; then
+                        log_success "Backend 서비스 준비 완료"
+                        break
+                    fi
+                fi
+                sleep 5
+            else
+                log_warning "컨테이너 상태 확인 중... ($i/20)"
+                sleep 5
+            fi
+            
+            if [ $i -eq 20 ]; then
+                log_warning "서비스 준비 시간 초과"
+            fi
+        done
         
         # 헬스체크
         if command -v curl &> /dev/null; then
             log_info "Backend 헬스체크..."
-            timeout 30 curl -f http://localhost:8000/health || log_warning "Backend 헬스체크 실패"
+            if timeout $HEALTH_TIMEOUT curl -f http://localhost:8000/health; then
+                log_success "Backend 헬스체크 성공"
+            else
+                log_warning "Backend 헬스체크 실패"
+            fi
             
             log_info "Frontend 헬스체크..."
-            timeout 30 curl -f http://localhost:3000 || log_warning "Frontend 헬스체크 실패"
+            if timeout $HEALTH_TIMEOUT curl -f http://localhost:3000; then
+                log_success "Frontend 헬스체크 성공"
+            else
+                log_warning "Frontend 헬스체크 실패"
+            fi
         else
             log_warning "curl이 설치되지 않음. 헬스체크 스킵"
         fi
         
+        # 컨테이너 로그 확인 (디버깅용)
+        log_info "컨테이너 상태 확인..."
+        $CONTAINER_CMD ps -a
+        
         # 서비스 정리
+        log_info "서비스 정리 중..."
         $COMPOSE_CMD -f $COMPOSE_FILE down
         
         log_success "E2E 테스트 완료"
