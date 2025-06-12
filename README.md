@@ -81,14 +81,22 @@ npm start
 - Backend API: http://localhost:8000
 - API 문서: http://localhost:8000/docs
 
-### Podman으로 실행
+### 컨테이너로 실행
 
+#### 로컬 개발 환경 (Podman 우선)
 ```bash
-# 전체 스택 실행
-podman-compose up --build
+# 간편 실행 스크립트 (권장)
+./run_local.sh
 
-# 백그라운드 실행
-podman-compose up -d --build
+# 또는 직접 실행
+podman-compose up --build  # Podman 사용 시
+docker-compose up --build  # Docker 사용 시
+```
+
+#### CI/CD 환경 (Docker 우선)
+```bash
+# 전체 테스트 및 빌드 (CI 환경에서 자동 감지)
+./run_and_test.sh
 ```
 
 ## 🧪 테스트
