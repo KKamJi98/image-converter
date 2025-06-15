@@ -15,6 +15,7 @@ export const ConversionProgress: React.FC = () => {
       <div className="progress-bar">
         <div
           className="progress-fill"
+          data-testid="progress-fill"
           style={{ width: `${progress.progress}%` }}
         />
       </div>

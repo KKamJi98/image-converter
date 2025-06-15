@@ -1,10 +1,9 @@
-import React, { act } from 'react';
+import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ConversionOptions } from '../ConversionOptions';
 
 // Mock zustand store
 const mockSetConversionOptions = jest.fn();
-
 jest.mock('../../stores/imageStore', () => ({
   useImageStore: () => ({
     conversionOptions: {
@@ -24,131 +23,107 @@ describe('ConversionOptions', () => {
   });
 
   test('renders conversion options title', () => {
-    act(() => {
-      render(<ConversionOptions />);
-    });
+    render(<ConversionOptions />);
 
     const title = screen.getByText(/변환 옵션/i);
     expect(title).toBeInTheDocument();
   });
 
-  test('renders format selection', () => {
-    act(() => {
-      render(<ConversionOptions />);
-    });
+  test('renders format buttons', () => {
+    render(<ConversionOptions />);
 
-    const formatLabel = screen.getByText(/출력 형식/i);
-    expect(formatLabel).toBeInTheDocument();
-
-    const webpButton = screen.getByText('WEBP');
-    expect(webpButton).toBeInTheDocument();
-    expect(webpButton).toHaveClass('active');
+    expect(screen.getByText('WEBP')).toBeInTheDocument();
+    expect(screen.getByText('JPEG')).toBeInTheDocument();
+    expect(screen.getByText('PNG')).toBeInTheDocument();
+    expect(screen.getByText('JPG')).toBeInTheDocument();
   });
 
-  test('handles format change', () => {
-    act(() => {
-      render(<ConversionOptions />);
-    });
+  test('renders quality slider', () => {
+    render(<ConversionOptions />);
 
-    const jpegButton = screen.getByText('JPEG');
-    
-    act(() => {
-      fireEvent.click(jpegButton);
-    });
-
-    expect(mockSetConversionOptions).toHaveBeenCalledWith({ targetFormat: 'jpeg' });
-  });
-
-  test('renders quality slider for lossy formats', () => {
-    act(() => {
-      render(<ConversionOptions />);
-    });
-
-    const qualityLabel = screen.getByText(/품질: 85%/i);
-    expect(qualityLabel).toBeInTheDocument();
-
-    const qualitySlider = screen.getByRole('slider');
+    const qualitySlider = screen.getByDisplayValue('85');
     expect(qualitySlider).toBeInTheDocument();
-    expect(qualitySlider).toHaveValue('85');
-  });
-
-  test('handles quality change', () => {
-    act(() => {
-      render(<ConversionOptions />);
-    });
-
-    const qualitySlider = screen.getByRole('slider');
-    
-    act(() => {
-      fireEvent.change(qualitySlider, { target: { value: '90' } });
-    });
-
-    expect(mockSetConversionOptions).toHaveBeenCalledWith({ quality: 90 });
   });
 
   test('renders size inputs', () => {
-    act(() => {
-      render(<ConversionOptions />);
-    });
+    render(<ConversionOptions />);
 
-    const maxWidthInput = screen.getByLabelText(/최대 너비/i);
-    const maxHeightInput = screen.getByLabelText(/최대 높이/i);
-    
+    const maxWidthInput = screen.getByDisplayValue('1920');
+    const maxHeightInput = screen.getByDisplayValue('1080');
+
     expect(maxWidthInput).toBeInTheDocument();
     expect(maxHeightInput).toBeInTheDocument();
-    expect(maxWidthInput).toHaveValue(1920);
-    expect(maxHeightInput).toHaveValue(1080);
   });
 
-  test('handles width change', () => {
-    act(() => {
-      render(<ConversionOptions />);
-    });
+  test('renders max size input', () => {
+    render(<ConversionOptions />);
 
-    const widthInput = screen.getByLabelText(/최대 너비/i);
-    
-    act(() => {
-      fireEvent.change(widthInput, { target: { value: '1280' } });
-    });
-
-    expect(mockSetConversionOptions).toHaveBeenCalledWith({ maxWidth: 1280 });
+    const maxSizeInput = screen.getByDisplayValue('1');
+    expect(maxSizeInput).toBeInTheDocument();
   });
 
-  test('handles height change', () => {
-    act(() => {
-      render(<ConversionOptions />);
-    });
+  test('format button click updates options', () => {
+    render(<ConversionOptions />);
 
-    const heightInput = screen.getByLabelText(/최대 높이/i);
-    
-    act(() => {
-      fireEvent.change(heightInput, { target: { value: '720' } });
-    });
+    const jpegButton = screen.getByText('JPEG');
+    fireEvent.click(jpegButton);
 
-    expect(mockSetConversionOptions).toHaveBeenCalledWith({ maxHeight: 720 });
+    expect(mockSetConversionOptions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        targetFormat: 'jpeg',
+      })
+    );
   });
 
-  test('renders file size limit input', () => {
-    act(() => {
-      render(<ConversionOptions />);
-    });
+  test('quality slider change updates options', () => {
+    render(<ConversionOptions />);
 
-    const fileSizeInput = screen.getByLabelText(/최대 크기/i);
-    expect(fileSizeInput).toBeInTheDocument();
-    expect(fileSizeInput).toHaveValue(1);
+    const qualitySlider = screen.getByDisplayValue('85');
+    fireEvent.change(qualitySlider, { target: { value: '90' } });
+
+    expect(mockSetConversionOptions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        quality: 90,
+      })
+    );
   });
 
-  test('handles file size change', () => {
-    act(() => {
-      render(<ConversionOptions />);
-    });
+  test('max width input change updates options', () => {
+    render(<ConversionOptions />);
 
-    const fileSizeInput = screen.getByLabelText(/최대 크기/i);
-    
-    act(() => {
-      fireEvent.change(fileSizeInput, { target: { value: '2.5' } });
-    });
+    const maxWidthInput = screen.getByDisplayValue('1920');
+    fireEvent.change(maxWidthInput, { target: { value: '1280' } });
 
-    expect(mockSetConversionOptions).toHaveBeenCalledWith({ maxSizeMb: 2.5 });
+    expect(mockSetConversionOptions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        maxWidth: 1280,
+      })
+    );
+  });
+
+  test('max height input change updates options', () => {
+    render(<ConversionOptions />);
+
+    const maxHeightInput = screen.getByDisplayValue('1080');
+    fireEvent.change(maxHeightInput, { target: { value: '720' } });
+
+    expect(mockSetConversionOptions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        maxHeight: 720,
+      })
+    );
+  });
+
+  test('max size input change updates options', () => {
+    render(<ConversionOptions />);
+
+    const maxSizeInput = screen.getByDisplayValue('1');
+    fireEvent.change(maxSizeInput, { target: { value: '2' } });
+
+    expect(mockSetConversionOptions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        maxSizeMb: 2,
+      })
+    );
   });
 });

@@ -113,7 +113,10 @@ describe('imageStore', () => {
     act(() => {
       result.current.setSelectedFile(file);
       result.current.setConvertedImageUrl('test-url');
-      result.current.setConversionOptions({ targetFormat: 'jpeg', quality: 90 });
+      result.current.setConversionOptions({
+        targetFormat: 'jpeg',
+        quality: 90,
+      });
       result.current.setProgress({ isConverting: true, progress: 50 });
       result.current.setError('test error');
     });
