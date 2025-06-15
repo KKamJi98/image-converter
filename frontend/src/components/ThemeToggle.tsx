@@ -12,7 +12,11 @@ export const ThemeToggle: React.FC = () => {
       onClick={toggleTheme}
       aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
     >
-      {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+      {theme === 'light' ? (
+        <Moon size={20} data-testid="moon-icon" />
+      ) : (
+        <Sun size={20} data-testid="sun-icon" />
+      )}
     </button>
   );
 };
