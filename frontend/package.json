@@ -2,52 +2,45 @@
   "name": "image-convertor-frontend",
   "version": "0.1.0",
   "private": true,
+  "author": "TaeJi Kim <rlaxowl5460@gmail.com>",
   "dependencies": {
-    "@testing-library/jest-dom": "^6.4.8",
-    "@testing-library/react": "^16.0.1",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^14.5.2",
     "@types/jest": "^29.5.12",
-    "@types/node": "^22.5.4",
+    "@types/node": "^20.14.0",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
+    "axios": "^1.7.7",
+    "lucide-react": "^0.445.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-dropzone": "^14.2.9",
     "react-scripts": "5.0.1",
-    "typescript": "^5.5.4",
-    "zustand": "^4.5.5",
-    "axios": "^1.7.7",
-    "react-dropzone": "^14.2.3",
-    "lucide-react": "^0.441.0"
+    "typescript": "^4.9.5",
+    "web-vitals": "^4.2.3",
+    "zustand": "^4.5.5"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test --transformIgnorePatterns \"node_modules/(?!axios)/\"",
-    "test:ci": "react-scripts test --transformIgnorePatterns \"node_modules/(?!axios)/\" --watchAll=false --coverage --verbose=false --silent",
+    "test": "react-scripts test",
+    "test:ci": "react-scripts test --coverage --ci --watchAll=false",
     "eject": "react-scripts eject",
-    "lint": "eslint src --ext .ts,.tsx",
-    "lint:fix": "eslint src --ext .ts,.tsx --fix",
-    "format": "prettier --write src/**/*.{ts,tsx,css,md}",
-    "format:check": "prettier --check src/**/*.{ts,tsx,css,md}"
+    "lint": "eslint src --ext .js,.jsx,.ts,.tsx",
+    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,css,md}\"",
+    "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,css,md}\""
   },
   "jest": {
-    "collectCoverageFrom": [
-      "src/**/*.{ts,tsx}",
-      "!src/index.tsx",
-      "!src/setupTests.ts"
-    ],
-    "coverageReporters": ["text", "lcov"]
+    "transformIgnorePatterns": [
+      "node_modules/(?!(axios)/)"
+    ]
   },
   "eslintConfig": {
     "extends": [
       "react-app",
       "react-app/jest"
-    ],
-    "rules": {
-      "@typescript-eslint/no-unused-vars": "error",
-      "@typescript-eslint/explicit-function-return-type": "off",
-      "react-hooks/exhaustive-deps": "warn"
-    }
+    ]
   },
   "browserslist": {
     "production": [
@@ -62,24 +55,14 @@
     ]
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^7.18.0",
-    "@typescript-eslint/parser": "^7.18.0",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
     "eslint": "^8.57.1",
-    "eslint-config-airbnb-typescript": "^18.0.0",
-    "eslint-plugin-import": "^2.30.0",
-    "eslint-plugin-jsx-a11y": "^6.10.0",
-    "eslint-plugin-react": "^7.35.2",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-react": "^7.36.1",
     "eslint-plugin-react-hooks": "^4.6.2",
-    "prettier": "^3.3.3"
-  },
-  "proxy": "http://localhost:8000",
-  "overrides": {
-    "react-scripts": {
-      "typescript": "^5.5.4"
-    },
-    "nth-check": "^2.1.1",
-    "postcss": "^8.4.31",
-    "webpack-dev-server": "^4.15.1",
-    "svgo": "^3.0.0"
+    "prettier": "^3.3.3",
+    "tailwindcss": "^3.4.11"
   }
 }

@@ -19,17 +19,17 @@ FastAPI 기반의 이미지 변환 API 백엔드입니다.
 
 ```bash
 # 의존성 설치
-poetry install
+uv pip install -e .
 
 # 개발 서버 실행
-poetry run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 # 테스트 실행
-poetry run pytest
+pytest
 
 # 코드 포맷팅
-poetry run black .
-poetry run isort .
+black .
+isort .
 ```
 
 ## 환경 변수
@@ -41,4 +41,4 @@ poetry run isort .
 - **FastAPI**: 웹 프레임워크
 - **Pillow (PIL)**: 이미지 처리
 - **Pydantic v2**: 데이터 검증
-- **Poetry**: 의존성 관리
+- **uv**: 의존성 관리

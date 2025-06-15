@@ -19,7 +19,7 @@
 │   React SPA     │    │   FastAPI       │
 │   (Frontend)    │◄──►│   (Backend)     │
 │                 │    │                 │
-│ • TypeScript    │    │ • Python 3.12+ │
+│ • TypeScript    │    │ • Python 3.13+ │
 │ • Zustand       │    │ • PIL/Pillow    │
 │ • Tailwind CSS  │    │ • Pydantic v2   │
 └─────────────────┘    └─────────────────┘
@@ -38,7 +38,7 @@
 - **FastAPI** - 웹 프레임워크
 - **Pillow (PIL)** - 이미지 처리
 - **Pydantic v2** - 데이터 검증
-- **Poetry** - 의존성 관리
+- **uv** - 의존성 관리
 
 ### DevOps
 - **Podman** - 컨테이너 런타임 (로컬 개발)
@@ -49,9 +49,9 @@
 ## 🚀 빠른 시작
 
 ### 개발 환경 요구사항
-- Python 3.12+
+- Python 3.13+
 - Node.js 20+
-- Poetry
+- uv
 - Podman (컨테이너 런타임)
 
 ### 로컬 개발
@@ -62,18 +62,14 @@ git clone <repository-url>
 cd image-convertor
 ```
 
-2. **백엔드 실행**
+2. **셋업 스크립트 실행**
 ```bash
-cd backend
-poetry install
-poetry run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+./setup.sh
 ```
 
-3. **프론트엔드 실행** (새 터미널)
+3. **로컬 실행**
 ```bash
-cd frontend
-npm install
-npm start
+./run_local.sh
 ```
 
 4. **브라우저에서 접속**
@@ -110,7 +106,7 @@ docker-compose up --build  # Docker 사용 시
 ```bash
 # 백엔드 테스트
 cd backend
-poetry run pytest
+pytest
 
 # 프론트엔드 테스트
 cd frontend
@@ -118,8 +114,8 @@ npm test
 
 # 코드 품질 검사
 cd backend
-poetry run black --check .
-poetry run isort --check-only .
+black --check .
+isort --check-only .
 
 cd frontend
 npm run lint
@@ -200,4 +196,5 @@ helm install image-converter ./infra/helm-chart \
 
 ## 📞 지원
 
+- 👨‍💻 개발자: TaeJi Kim
 - 📧 Email: rlaxowl5460@gmail.com

@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.13-slim
 
 WORKDIR /app
 
@@ -16,23 +16,20 @@ RUN apt-get update && apt-get install -y \
     python3-tk \
     && rm -rf /var/lib/apt/lists/*
 
-# Poetry 설치
-RUN pip install poetry
+# uv 설치
+RUN pip install uv
 
-# Poetry 설정
-ENV POETRY_NO_INTERACTION=1 \
-    POETRY_VENV_IN_PROJECT=1 \
-    POETRY_CACHE_DIR=/tmp/poetry_cache \
-    PYTHONPATH=/app
+# 환경 변수 설정
+ENV PYTHONPATH=/app
 
 # 의존성 파일들 복사
-COPY pyproject.toml poetry.lock* ./
+COPY pyproject.toml ./
 
 # 애플리케이션 코드 복사
 COPY . .
 
-# 의존성 설치 (전체 프로젝트 포함)
-RUN poetry install --only=main && rm -rf $POETRY_CACHE_DIR
+# 의존성 설치
+RUN uv pip install --system -e .
 
 # 포트 노출
 EXPOSE 8000
@@ -41,5 +38,10 @@ EXPOSE 8000
 HEALTHCHECK --interval=15s --timeout=10s --start-period=45s --retries=5 \
     CMD curl -f http://localhost:8000/health || exit 1
 
+# 메타데이터 추가
+LABEL maintainer="TaeJi Kim <rlaxowl5460@gmail.com>"
+LABEL version="0.1.0"
+LABEL description="Image Converter Backend API"
+
 # 애플리케이션 실행
-CMD ["poetry", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

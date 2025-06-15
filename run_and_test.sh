@@ -55,20 +55,20 @@ HEALTH_TIMEOUT=60
 log_info "Backend 테스트 시작..."
 cd backend
 
-if command -v poetry &> /dev/null; then
-    log_info "Poetry로 의존성 설치 중..."
-    poetry install || log_error "Backend 의존성 설치 실패"
+if command -v uv &> /dev/null; then
+    log_info "uv로 의존성 설치 중..."
+    uv pip install -e . || log_error "Backend 의존성 설치 실패"
     
     log_info "Backend 테스트 실행 중..."
-    timeout $TIMEOUT poetry run pytest -v --tb=short || log_error "Backend 테스트 실패"
+    timeout $TIMEOUT pytest -v --tb=short || log_error "Backend 테스트 실패"
     
     log_info "Backend 코드 포맷팅 검사 중..."
-    timeout $TIMEOUT poetry run black --check . || log_error "Backend 코드 포맷팅 검사 실패"
-    timeout $TIMEOUT poetry run isort --check-only . || log_error "Backend import 정렬 검사 실패"
+    timeout $TIMEOUT black --check . || log_error "Backend 코드 포맷팅 검사 실패"
+    timeout $TIMEOUT isort --check-only . || log_error "Backend import 정렬 검사 실패"
     
     log_success "Backend 테스트 완료"
 else
-    log_error "Poetry가 설치되지 않음. Backend 테스트를 실행할 수 없습니다."
+    log_error "uv가 설치되지 않음. Backend 테스트를 실행할 수 없습니다."
 fi
 
 cd ..
