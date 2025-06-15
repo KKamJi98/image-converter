@@ -67,14 +67,14 @@ if command -v uv &> /dev/null; then
     
     # CI 환경에서는 시스템에 직접 설치, 로컬에서는 가상환경 사용
     if [ "$CI" = "true" ] || [ "$GITHUB_ACTIONS" = "true" ] || [ "$GITLAB_CI" = "true" ]; then
-        uv pip install --system -e . || log_error "Backend 의존성 설치 실패"
+        uv pip install --system -e ".[dev]" || log_error "Backend 의존성 설치 실패"
     else
         # 로컬 환경: 가상환경이 없으면 생성
         if [ ! -d ".venv" ]; then
             log_info "가상환경 생성 중..."
             uv venv
         fi
-        uv pip install -e . || log_error "Backend 의존성 설치 실패"
+        uv pip install -e ".[dev]" || log_error "Backend 의존성 설치 실패"
     fi
     
     log_info "Backend 테스트 실행 중..."
