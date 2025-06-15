@@ -158,6 +158,17 @@ jobs:
     - name: Install uv
       run: pip install uv
     
+    - name: Prepare backend environment for E2E
+      working-directory: backend
+      run: |
+        uv venv
+        source .venv/bin/activate
+        uv pip install -e ".[dev]"
+    
+    - name: Prepare frontend environment for E2E
+      working-directory: frontend
+      run: npm ci
+    
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
     

@@ -35,9 +35,16 @@ log_error() {
 cleanup_on_error() {
     log_info "에러 발생으로 인한 정리 작업 중..."
     
-    # 실행 중인 컨테이너 정리
+    # 실행 중인 컨테이너 정리 (강제 종료 및 삭제)
     if [ -n "$COMPOSE_CMD" ] && [ -f "$COMPOSE_FILE" ]; then
-        $COMPOSE_CMD -f $COMPOSE_FILE down 2>/dev/null || true
+        $COMPOSE_CMD -f $COMPOSE_FILE down --remove-orphans 2>/dev/null || true
+        $COMPOSE_CMD -f $COMPOSE_FILE rm -f 2>/dev/null || true
+    fi
+    
+    # 개별 컨테이너 정리 (이름으로 강제 삭제)
+    if [ -n "$CONTAINER_CMD" ]; then
+        $CONTAINER_CMD stop image-convertor_backend_1 image-convertor_frontend_1 2>/dev/null || true
+        $CONTAINER_CMD rm -f image-convertor_backend_1 image-convertor_frontend_1 2>/dev/null || true
     fi
     
     # 테스트 이미지 정리
@@ -57,7 +64,18 @@ cd backend
 
 if command -v uv &> /dev/null; then
     log_info "uv로 의존성 설치 중..."
-    uv pip install -e . || log_error "Backend 의존성 설치 실패"
+    
+    # CI 환경에서는 시스템에 직접 설치, 로컬에서는 가상환경 사용
+    if [ "$CI" = "true" ] || [ "$GITHUB_ACTIONS" = "true" ] || [ "$GITLAB_CI" = "true" ]; then
+        uv pip install --system -e . || log_error "Backend 의존성 설치 실패"
+    else
+        # 로컬 환경: 가상환경이 없으면 생성
+        if [ ! -d ".venv" ]; then
+            log_info "가상환경 생성 중..."
+            uv venv
+        fi
+        uv pip install -e . || log_error "Backend 의존성 설치 실패"
+    fi
     
     log_info "Backend 테스트 실행 중..."
     timeout $TIMEOUT pytest -v --tb=short || log_error "Backend 테스트 실패"
@@ -138,6 +156,12 @@ if [ -n "$CONTAINER_CMD" ]; then
     
     # 4. E2E 테스트 (간단한 헬스체크)
     log_info "E2E 테스트 시작..."
+    
+    # 기존 컨테이너 정리 (E2E 테스트 시작 전)
+    if [ -n "$CONTAINER_CMD" ]; then
+        $CONTAINER_CMD stop image-convertor_backend_1 image-convertor_frontend_1 2>/dev/null || true
+        $CONTAINER_CMD rm -f image-convertor_backend_1 image-convertor_frontend_1 2>/dev/null || true
+    fi
     
     COMPOSE_CMD=""
     COMPOSE_FILE=""
