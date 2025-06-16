@@ -155,6 +155,6 @@ jobs:
           file: ./${{ matrix.component }}/Dockerfile
           push: true
           tags: |
-            ${{ secrets.HARBOR_REGISTRY }}/${{ secrets.HARBOR_PROJECT }}/image-converter-${{ matrix.component }}:latest
-            ${{ secrets.HARBOR_REGISTRY }}/${{ secrets.HARBOR_PROJECT }}/image-converter-${{ matrix.component }}:${{ github.sha }}
+            ${{ secrets.HARBOR_REGISTRY }}/${{ secrets.HARBOR_PROJECT }}/${{ matrix.component }}:latest
+            ${{ secrets.HARBOR_REGISTRY }}/${{ secrets.HARBOR_PROJECT }}/${{ matrix.component }}:${{ github.sha }}
 
