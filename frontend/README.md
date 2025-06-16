@@ -82,7 +82,8 @@ npm run format
 ### 환경 변수
 ```bash
 # .env.local
-REACT_APP_API_URL=http://localhost:8000
+REACT_APP_API_URL=/api
+BACKEND_ENDPOINT=http://backend:8000/api
 ```
 
 ## 📱 주요 기능
@@ -194,6 +195,7 @@ docker build -t image-converter-frontend .
 
 1. **API 연결 오류**
    - `REACT_APP_API_URL` 환경 변수 확인
+   - `BACKEND_ENDPOINT` 값이 올바른지 확인
    - 백엔드 서버 실행 상태 확인
 
 2. **파일 업로드 실패**
