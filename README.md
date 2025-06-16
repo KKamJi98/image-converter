@@ -188,6 +188,9 @@ helm install image-converter ./infra/helm-chart \
 - `test:` 테스트 추가/수정
 - `chore:` 빌드 프로세스 또는 보조 도구 변경
 
+### 브랜치 및 Pull Request 규칙
+- 모든 브랜치 이름과 Pull Request 제목은 **영어**로 작성합니다.
+
 ## 📄 라이선스
 
 이 프로젝트는 MIT 라이선스 하에 배포됩니다. 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
