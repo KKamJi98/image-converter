@@ -143,7 +143,6 @@ ingress:
   enabled: true
   className: "nginx"                  # Ingress 클래스
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
   
   hosts:

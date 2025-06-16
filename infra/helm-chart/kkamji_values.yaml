@@ -61,13 +61,12 @@ frontend:
     - name: REACT_APP_API_URL
       value: "/api"
     - name: BACKEND_ENDPOINT
-      value: "http://image-converter-backend:8000/api"
+      value: "http://image-converter-backend:8000"
 
 ingress:
   enabled: true
   className: "nginx"
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     cert-manager.io/cluster-issuer: letsencrypt-prod
   hosts:

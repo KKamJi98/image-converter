@@ -2,6 +2,8 @@ import axios from 'axios';
 import { ConversionOptions } from '../stores/imageStore';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
+// REACT_APP_API_URL should be set to the proxy prefix ("/api").
+// Endpoints below omit this prefix to avoid `/api/api` duplication.
 
 // 테스트 환경에서 사용할 수 있도록 export
 export const apiClient = axios.create({
@@ -34,7 +36,7 @@ export const convertImage = async (
   }
 
   try {
-    const response = await apiClient.post('/api/v1/convert', formData, {
+    const response = await apiClient.post('/v1/convert', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -43,6 +45,7 @@ export const convertImage = async (
 
     return response.data;
   } catch (error) {
+    console.error('Image conversion failed:', error);
     if (axios.isAxiosError(error)) {
       if (error.response?.status === 400) {
         throw new Error('잘못된 이미지 파일입니다.');
@@ -61,7 +64,7 @@ export const convertImage = async (
 
 export const getSupportedFormats = async () => {
   try {
-    const response = await apiClient.get('/api/v1/formats');
+    const response = await apiClient.get('/v1/formats');
     return response.data;
   } catch (error) {
     console.error('Failed to fetch supported formats:', error);

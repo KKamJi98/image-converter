@@ -27,7 +27,7 @@ services:
         condition: service_healthy
     environment:
       - REACT_APP_API_URL=/api
-      - BACKEND_ENDPOINT=http://backend:8000/api
+      - BACKEND_ENDPOINT=http://backend:8000
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:80"]
       interval: 15s

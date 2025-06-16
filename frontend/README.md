@@ -83,8 +83,10 @@ npm run format
 ```bash
 # .env.local
 REACT_APP_API_URL=/api
-BACKEND_ENDPOINT=http://backend:8000/api
+BACKEND_ENDPOINT=http://backend:8000
 ```
+`REACT_APP_API_URL`는 프록시 경로(`/api`)를 지정합니다.
+코드에서는 `/v1`과 같이 접미사만 사용하여 중복을 방지합니다.
 
 ## 📱 주요 기능
 
