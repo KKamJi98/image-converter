@@ -4,6 +4,7 @@ WebP, JPEG, PNG 형식 간 변환 및 크기/품질 조정 지원
 """
 
 import io
+import logging
 from typing import Optional
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
@@ -12,6 +13,8 @@ from PIL import Image
 
 from app.models.image_models import ConversionRequest, ConversionResponse
 from app.services.image_converter import ImageConverter
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 converter = ImageConverter()
@@ -38,11 +41,18 @@ async def convert_image(
         quality: 이미지 품질 (1-100, JPEG/WebP만 적용)
     """
     if not file.content_type or not file.content_type.startswith("image/"):
+        logger.warning("Invalid file upload attempted: %s", file.filename)
         raise HTTPException(status_code=400, detail="Invalid image file")
 
     try:
         # 이미지 파일 읽기
         image_data = await file.read()
+        logger.info(
+            "Converting %s (%d bytes) to %s",
+            file.filename,
+            len(image_data),
+            target_format,
+        )
 
         # 변환 요청 객체 생성
         request = ConversionRequest(
@@ -55,6 +65,13 @@ async def convert_image(
 
         # 이미지 변환 수행
         converted_data, metadata = await converter.convert_image(image_data, request)
+        logger.info(
+            "Conversion complete: %s -> %s (%d -> %d bytes)",
+            metadata.original_format,
+            metadata.converted_format,
+            metadata.original_size,
+            metadata.converted_size,
+        )
 
         # 변환된 이미지를 스트림으로 반환
         return StreamingResponse(
@@ -77,6 +94,7 @@ async def convert_image(
 @router.get("/formats")
 async def get_supported_formats():
     """지원하는 이미지 형식 목록 반환"""
+    logger.info("Supported formats requested")
     return {
         "supported_formats": ["webp", "jpeg", "jpg", "png"],
         "input_formats": ["webp", "jpeg", "jpg", "png", "bmp", "tiff"],

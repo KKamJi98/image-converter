@@ -3,8 +3,13 @@ Image Converter Backend API
 FastAPI 기반 이미지 변환 서비스
 """
 
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 from app.api import images
 
@@ -30,10 +35,12 @@ app.include_router(images.router, prefix="/api/v1", tags=["images"])
 @app.get("/")
 async def root():
     """Health check endpoint"""
+    logger.info("Root endpoint called")
     return {"message": "Image Converter API is running"}
 
 
 @app.get("/health")
 async def health_check():
     """Health check for Kubernetes probes"""
+    logger.info("Health check requested")
     return {"status": "healthy"}

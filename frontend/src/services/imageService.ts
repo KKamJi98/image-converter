@@ -2,6 +2,8 @@ import axios from 'axios';
 import { ConversionOptions } from '../stores/imageStore';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
+// REACT_APP_API_URL should be set to the proxy prefix ("/api").
+// Endpoints below omit this prefix to avoid `/api/api` duplication.
 
 // 테스트 환경에서 사용할 수 있도록 export
 export const apiClient = axios.create({

@@ -153,6 +153,7 @@ helm install image-converter ./infra/helm-chart \
 
 #### Frontend
 - `REACT_APP_API_URL`: 백엔드 API URL (기본값: `/api`)
+  - 이 값은 프록시 경로를 의미하므로 코드에서는 `/v1`과 같이 접미사만 사용합니다.
 - `BACKEND_ENDPOINT`: 프록시가 요청을 전달할 백엔드 서비스 주소
   - Docker Compose: `http://backend:8000`
   - Helm: `http://image-converter-backend:8000`
