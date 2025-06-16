@@ -1,5 +1,5 @@
 [project]
-name = "image-convertor-backend"
+name = "image-converter-backend"
 version = "0.1.0"
 description = "Image conversion API backend"
 authors = [

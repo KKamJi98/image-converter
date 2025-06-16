@@ -1,7 +1,7 @@
 global:
   imageRegistry: harbor.example.com
   imagePullSecrets: []
-fullnameOverride: image-convertor
+fullnameOverride: image-converter
 
 backend:
   image:

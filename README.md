@@ -61,7 +61,7 @@
 1. **저장소 클론**
 ```bash
 git clone <repository-url>
-cd image-convertor
+cd image-converter
 ```
 
 2. **셋업 스크립트 실행**
@@ -199,9 +199,9 @@ helm install image-converter ./infra/helm-chart \
 
 ## 🐛 버그 리포트 & 기능 요청
 
-이슈가 있거나 새로운 기능을 제안하고 싶으시면 [GitHub Issues](https://github.com/your-repo/image-convertor/issues)를 이용해 주세요.
+이슈가 있거나 새로운 기능을 제안하고 싶으시면 [GitHub Issues](https://github.com/KKamJi98/image-converter/issues)를 이용해 주세요.
 
 ## 📞 지원
 
 - 👨‍💻 개발자: TaeJi Kim
-- 📧 Email: rlaxowl5460@gmail.com
+- 📧 Email: `rlaxowl5460@gmail.com`

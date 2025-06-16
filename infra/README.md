@@ -371,7 +371,7 @@ metadata:
   name: image-converter
 spec:
   source:
-    repoURL: https://github.com/your-repo/image-convertor
+    repoURL: https://github.com/KKamJi98/image-converter
     path: infra/helm-chart
     targetRevision: main
   destination:
@@ -404,6 +404,6 @@ spec:
 
 ## 📞 지원
 
-- **인프라 문의**: infra-team@example.com
-- **이슈 리포트**: [GitHub Issues](https://github.com/your-repo/image-convertor/issues)
+- **인프라 문의**: `rlaxowl5460@gmail.com`
+- **이슈 리포트**: [GitHub Issues](https://github.com/KKamJi98/image-converter/issues)
 - **Helm 차트**: [Artifact Hub](https://artifacthub.io/)

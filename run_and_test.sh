@@ -43,8 +43,8 @@ cleanup_on_error() {
     
     # 개별 컨테이너 정리 (이름으로 강제 삭제)
     if [ -n "$CONTAINER_CMD" ]; then
-        $CONTAINER_CMD stop image-convertor_backend_1 image-convertor_frontend_1 2>/dev/null || true
-        $CONTAINER_CMD rm -f image-convertor_backend_1 image-convertor_frontend_1 2>/dev/null || true
+        $CONTAINER_CMD stop image-converter_backend_1 image-converter_frontend_1 2>/dev/null || true
+        $CONTAINER_CMD rm -f image-converter_backend_1 image-converter_frontend_1 2>/dev/null || true
     fi
     
     # 테스트 이미지 정리
@@ -137,8 +137,8 @@ if [ -n "$CONTAINER_CMD" ]; then
     
     # 기존 컨테이너 정리 (E2E 테스트 시작 전)
     if [ -n "$CONTAINER_CMD" ]; then
-        $CONTAINER_CMD stop image-convertor_backend_1 image-convertor_frontend_1 2>/dev/null || true
-        $CONTAINER_CMD rm -f image-convertor_backend_1 image-convertor_frontend_1 2>/dev/null || true
+        $CONTAINER_CMD stop image-converter_backend_1 image-converter_frontend_1 2>/dev/null || true
+        $CONTAINER_CMD rm -f image-converter_backend_1 image-converter_frontend_1 2>/dev/null || true
     fi
     
     COMPOSE_CMD=""

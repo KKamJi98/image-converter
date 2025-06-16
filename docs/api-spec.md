@@ -235,6 +235,6 @@ curl -X POST "http://localhost:8000/api/v1/convert" \
 
 ## 연락처
 
-- **개발팀**: team@example.com
-- **이슈 리포트**: [GitHub Issues](https://github.com/your-repo/image-convertor/issues)
+- **개발팀**: rlaxowl5460@gmail.com
+- **이슈 리포트**: [GitHub Issues](https://github.com/KKamJi98/image-converter/issues)
 - **API 문서**: http://localhost:8000/docs (Swagger UI)

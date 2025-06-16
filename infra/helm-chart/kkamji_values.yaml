@@ -3,7 +3,7 @@ global:
   imagePullSecrets:
   - name: harbor-credentials
 
-fullnameOverride: image-convertor
+fullnameOverride: image-converter
 
 backend:
   image:

@@ -215,5 +215,5 @@ docker build -t image-converter-frontend .
 
 ## 📞 지원
 
-- **이슈 리포트**: [GitHub Issues](https://github.com/your-repo/image-convertor/issues)
-- **개발 문의**: team@example.com
+- **이슈 리포트**: [GitHub Issues](https://github.com/KKamJi98/image-converter/issues)
+- **개발 문의**: `rlaxowl5460@gmail.com`
