@@ -45,7 +45,7 @@ Everything here has higher priority than any other instructions unless the chang
 - **Backend** : uv, Python 3.13+
 - **Frontend** : npm, Node 20+
 - **Infra**  : Kubernetes 1.30+, Helm v3, Harbor registry.
-- **Container Runtime** : Podman (로컬 개발 환경)
+- **Container Runtime** : Docker
 
 6. **배포 구조**
 
@@ -202,3 +202,7 @@ Everything here has higher priority than any other instructions unless the chang
   - Ingress(host: image-converter.kkamji.net) 및 `/api` 경로가 frontend/backend 서비스로 올바르게 라우팅됨을 검증
   - Frontend 컨테이너의 Nginx proxy(`/api`)가 backend 서비스로 요청 전달하는 것 확인
   - 컨테이너 이미지 빌드 및 서비스 간 통신 정상 작동 확인
+- **2025-06-17**: Podman 지원 제거 및 CI 개선
+  - Docker를 기본 컨테이너 런타임으로 변경
+  - CI 파이프라인 이미지 빌드/배포 단계 매트릭스 전략 도입
+  - README와 스크립트에서 Podman 관련 내용 제거

@@ -43,7 +43,7 @@
 - **uv** - 의존성 관리
 
 ### DevOps
-- **Podman** - 컨테이너 런타임 (로컬 개발)
+- **Docker** - 컨테이너 런타임
 - **Kubernetes** + **Helm**
 - **GitHub Actions** - CI/CD
 - **Harbor** - 컨테이너 레지스트리
@@ -53,8 +53,8 @@
 ### 개발 환경 요구사항
 - Python 3.13+
 - Node.js 20+
-- uv
-- Podman (컨테이너 런타임)
+ - uv
+ - Docker (컨테이너 런타임)
 
 ### 로컬 개발
 
@@ -81,14 +81,13 @@ cd image-convertor
 
 ### 컨테이너로 실행
 
-#### 로컬 개발 환경 (Podman 우선)
+#### 로컬 개발 환경
 ```bash
 # 간편 실행 스크립트 (권장)
 ./run_local.sh
 
 # 또는 직접 실행
-podman-compose up --build  # Podman 사용 시
-docker-compose up --build  # Docker 사용 시
+docker-compose up --build
 ```
 
 #### CI/CD 환경 (Docker 우선)
