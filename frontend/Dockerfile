@@ -24,8 +24,11 @@ RUN apk add --no-cache curl
 # 빌드된 파일 복사
 COPY --from=build /app/build /usr/share/nginx/html
 
-# Nginx 설정 복사
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Nginx 설정 템플릿 복사
+COPY nginx.conf /etc/nginx/templates/default.conf.template
+
+# 기본 백엔드 엔드포인트
+ENV BACKEND_ENDPOINT=http://localhost:8000
 
 # 포트 노출
 EXPOSE 80
