@@ -230,3 +230,5 @@ terraform.rc
 
 # Test coverage
 coverage/
+
+AGENTS.md

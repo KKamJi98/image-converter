@@ -1,14 +1,14 @@
 global:
-  imageRegistry: harbor.kkamji.net
+  imageRegistry: harbor.example.com
   imagePullSecrets: []
 
 backend:
   image:
     repository: image-converter/backend
-    tag: "0.1.0"
+    tag: "v1.0.0"
     pullPolicy: IfNotPresent
   
-  replicaCount: 2
+  replicaCount: 1
   
   service:
     type: ClusterIP
@@ -36,10 +36,10 @@ backend:
 frontend:
   image:
     repository: image-converter/frontend
-    tag: "0.1.0"
+    tag: "v1.0.0"
     pullPolicy: IfNotPresent
   
-  replicaCount: 2
+  replicaCount: 1
   
   service:
     type: ClusterIP
@@ -56,7 +56,7 @@ frontend:
   
   env:
     - name: REACT_APP_API_URL
-      value: "http://backend:8000"
+      value: "http://image-converter-backend.image-converter.svc.cluster.local:8000"
 
 ingress:
   enabled: true
@@ -64,6 +64,7 @@ ingress:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
   hosts:
     - host: image-converter.kkamji.net
       paths:
@@ -81,15 +82,15 @@ ingress:
 autoscaling:
   backend:
     enabled: true
-    minReplicas: 2
-    maxReplicas: 10
+    minReplicas: 1
+    maxReplicas: 3
     targetCPUUtilizationPercentage: 70
     targetMemoryUtilizationPercentage: 80
   
   frontend:
     enabled: true
-    minReplicas: 2
-    maxReplicas: 5
+    minReplicas: 1
+    maxReplicas: 3
     targetCPUUtilizationPercentage: 70
 
 podDisruptionBudget:

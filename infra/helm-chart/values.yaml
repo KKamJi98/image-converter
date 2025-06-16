@@ -5,7 +5,7 @@ global:
 backend:
   image:
     repository: image-converter/backend
-    tag: "0.1.0"
+    tag: "v1.0.0"
     pullPolicy: IfNotPresent
   
   replicaCount: 2
@@ -36,7 +36,7 @@ backend:
 frontend:
   image:
     repository: image-converter/frontend
-    tag: "0.1.0"
+    tag: "v1.0.0"
     pullPolicy: IfNotPresent
   
   replicaCount: 2
