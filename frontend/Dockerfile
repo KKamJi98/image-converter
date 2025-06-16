@@ -28,7 +28,7 @@ COPY --from=build /app/build /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/templates/default.conf.template
 
 # 기본 백엔드 엔드포인트
-ENV BACKEND_ENDPOINT=http://localhost:8000
+ENV BACKEND_ENDPOINT=http://localhost:8000/api
 
 # 포트 노출
 EXPOSE 80
