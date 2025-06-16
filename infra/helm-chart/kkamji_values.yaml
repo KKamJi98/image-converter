@@ -1,6 +1,7 @@
 global:
   imageRegistry: harbor.example.com
   imagePullSecrets: []
+fullnameOverride: image-convertor
 
 backend:
   image:
@@ -56,7 +57,9 @@ frontend:
   
   env:
     - name: REACT_APP_API_URL
-      value: "http://image-converter-backend.image-converter.svc.cluster.local:8000"
+      value: "http://image-convertor-backend.image-convertor.svc.cluster.local:8000"
+    - name: BACKEND_ENDPOINT
+      value: "http://image-convertor-backend:8000"
 
 ingress:
   enabled: true
