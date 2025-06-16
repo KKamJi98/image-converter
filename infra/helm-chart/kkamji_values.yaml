@@ -61,7 +61,7 @@ frontend:
     - name: REACT_APP_API_URL
       value: "/api"
     - name: BACKEND_ENDPOINT
-      value: "http://image-converter-backend:8000/api"
+      value: "http://image-converter-backend:8000"
 
 ingress:
   enabled: true

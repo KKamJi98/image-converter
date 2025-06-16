@@ -83,7 +83,7 @@ npm run format
 ```bash
 # .env.local
 REACT_APP_API_URL=/api
-BACKEND_ENDPOINT=http://backend:8000/api
+BACKEND_ENDPOINT=http://backend:8000
 ```
 
 ## 📱 주요 기능
