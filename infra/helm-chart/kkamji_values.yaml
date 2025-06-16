@@ -1,13 +1,15 @@
 global:
-  imageRegistry: harbor.example.com
-  imagePullSecrets: []
+  imageRegistry: harbor.kkamji.net
+  imagePullSecrets:
+  - name: harbor-credentials
+
 fullnameOverride: image-convertor
 
 backend:
   image:
     repository: image-converter/backend
-    tag: "v1.0.0"
-    pullPolicy: IfNotPresent
+    tag: "latest"
+    pullPolicy: always
   
   replicaCount: 1
   
@@ -37,8 +39,8 @@ backend:
 frontend:
   image:
     repository: image-converter/frontend
-    tag: "v1.0.0"
-    pullPolicy: IfNotPresent
+    tag: "latest"
+    pullPolicy: always
   
   replicaCount: 1
   
