@@ -7,15 +7,20 @@ on:
 jobs:
   test-and-lint:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        component: [backend, frontend]
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Python 3.13
+        if: matrix.component == 'backend'
         uses: actions/setup-python@v4
         with:
           python-version: '3.13'
 
       - name: Set up Node.js 20
+        if: matrix.component == 'frontend'
         uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -23,9 +28,11 @@ jobs:
           cache-dependency-path: ./frontend/package.json
 
       - name: Install uv
+        if: matrix.component == 'backend'
         run: pip install uv
 
       - name: Cache Python dependencies
+        if: matrix.component == 'backend'
         uses: actions/cache@v3
         with:
           path: |
@@ -33,7 +40,8 @@ jobs:
             backend/.venv
           key: ${{ runner.os }}-uv-${{ hashFiles('backend/pyproject.toml') }}
 
-      - name: Create virtual environment and install backend dependencies
+      - name: Install backend dependencies
+        if: matrix.component == 'backend'
         working-directory: backend
         run: |
           uv venv
@@ -41,31 +49,24 @@ jobs:
           uv pip install -e ".[dev]"
 
       - name: Install frontend dependencies
+        if: matrix.component == 'frontend'
         working-directory: frontend
         run: npm ci
 
-      - name: Run backend tests
+      - name: Run backend tests and lint
+        if: matrix.component == 'backend'
         working-directory: backend
         run: |
           source .venv/bin/activate
           export PYTHONPATH=$PYTHONPATH:$(pwd)
           pytest
-
-      - name: Run frontend tests
-        working-directory: frontend
-        run: |
-          npm test -- --coverage --watchAll=false
-
-      - name: Run backend linting
-        working-directory: backend
-        run: |
-          source .venv/bin/activate
-          export PYTHONPATH=$PYTHONPATH:$(pwd)
           black --check .
           isort --check-only .
 
-      - name: Run frontend linting
+      - name: Run frontend tests and lint
+        if: matrix.component == 'frontend'
         working-directory: frontend
         run: |
+          npm run test:ci
           npm run lint
           npm run format:check

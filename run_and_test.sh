@@ -120,29 +120,11 @@ cd ..
 log_info "컨테이너 이미지 빌드 테스트 시작..."
 
 CONTAINER_CMD=""
-# CI 환경 감지 (GitHub Actions, GitLab CI 등)
-if [ -n "$CI" ] || [ -n "$GITHUB_ACTIONS" ] || [ -n "$GITLAB_CI" ]; then
-    log_info "CI 환경 감지됨. Docker 우선 사용..."
-    if command -v docker &> /dev/null; then
-        CONTAINER_CMD="docker"
-        log_info "Docker를 사용하여 이미지 빌드 중..."
-    elif command -v podman &> /dev/null; then
-        CONTAINER_CMD="podman"
-        log_info "Docker 없음. Podman을 사용하여 이미지 빌드 중..."
-    fi
-else
-    log_info "로컬 환경 감지됨. Podman 우선 사용..."
-    if command -v podman &> /dev/null; then
-        CONTAINER_CMD="podman"
-        log_info "Podman을 사용하여 이미지 빌드 중..."
-    elif command -v docker &> /dev/null; then
-        CONTAINER_CMD="docker"
-        log_info "Podman 없음. Docker를 사용하여 이미지 빌드 중..."
-    fi
-fi
 
-if [ -z "$CONTAINER_CMD" ]; then
-    log_warning "Podman 또는 Docker가 설치되지 않음. 컨테이너 빌드 스킵"
+if command -v docker &> /dev/null; then
+    CONTAINER_CMD="docker"
+else
+    log_warning "Docker가 설치되어 있지 않음. 컨테이너 빌드 스킵"
 fi
 
 if [ -n "$CONTAINER_CMD" ]; then
@@ -166,30 +148,12 @@ if [ -n "$CONTAINER_CMD" ]; then
     COMPOSE_CMD=""
     COMPOSE_FILE=""
     
-    # CI 환경에서는 Docker Compose 우선 사용
-    if [ -n "$CI" ] || [ -n "$GITHUB_ACTIONS" ] || [ -n "$GITLAB_CI" ]; then
-        if command -v docker-compose &> /dev/null; then
-            COMPOSE_CMD="docker-compose"
-            COMPOSE_FILE="docker-compose.yml"
-        elif command -v docker &> /dev/null && $CONTAINER_CMD compose version &> /dev/null; then
-            COMPOSE_CMD="$CONTAINER_CMD compose"
-            COMPOSE_FILE="docker-compose.yml"
-        elif command -v podman-compose &> /dev/null; then
-            COMPOSE_CMD="podman-compose"
-            COMPOSE_FILE="podman-compose.yml"
-        fi
-    else
-        # 로컬 환경에서는 Podman Compose 우선 사용
-        if command -v podman-compose &> /dev/null; then
-            COMPOSE_CMD="podman-compose"
-            COMPOSE_FILE="podman-compose.yml"
-        elif command -v docker-compose &> /dev/null; then
-            COMPOSE_CMD="docker-compose"
-            COMPOSE_FILE="docker-compose.yml"
-        elif command -v docker &> /dev/null && $CONTAINER_CMD compose version &> /dev/null; then
-            COMPOSE_CMD="$CONTAINER_CMD compose"
-            COMPOSE_FILE="docker-compose.yml"
-        fi
+    if command -v docker-compose &> /dev/null; then
+        COMPOSE_CMD="docker-compose"
+        COMPOSE_FILE="docker-compose.yml"
+    elif command -v docker &> /dev/null && $CONTAINER_CMD compose version &> /dev/null; then
+        COMPOSE_CMD="$CONTAINER_CMD compose"
+        COMPOSE_FILE="docker-compose.yml"
     fi
     
     if [ -n "$COMPOSE_CMD" ] && [ -f "$COMPOSE_FILE" ]; then

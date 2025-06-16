@@ -34,7 +34,7 @@ fi
 
 # 실행 방식 선택
 echo "실행 방식을 선택하세요:"
-echo "1) 컨테이너로 실행 (Podman/Docker)"
+echo "1) 컨테이너로 실행 (Docker)"
 echo "2) 로컬에서 직접 실행 (가상환경)"
 read -p "선택 (기본값: 2): " choice
 
@@ -98,36 +98,22 @@ EOF
     # 메인 프로세스가 종료되지 않도록 대기
     wait
 else
-    # 컨테이너로 실행
-    # 컨테이너 런타임 감지 (Podman 우선, Docker 대체)
+    # 컨테이너로 실행 (Docker 사용)
     CONTAINER_CMD=""
     COMPOSE_CMD=""
-    COMPOSE_FILE=""
+    COMPOSE_FILE="docker-compose.yml"
 
-    if command -v podman &> /dev/null; then
-        CONTAINER_CMD="podman"
-        if command -v podman-compose &> /dev/null; then
-            COMPOSE_CMD="podman-compose"
-            COMPOSE_FILE="podman-compose.yml"
-            log_info "Podman + Podman Compose 사용"
-        else
-            log_error "podman-compose가 설치되지 않음. 'pip install podman-compose' 실행 필요"
-        fi
-    elif command -v docker &> /dev/null; then
+    if command -v docker &> /dev/null; then
         CONTAINER_CMD="docker"
         if command -v docker-compose &> /dev/null; then
             COMPOSE_CMD="docker-compose"
-            COMPOSE_FILE="docker-compose.yml"
-            log_info "Docker + Docker Compose 사용"
         elif $CONTAINER_CMD compose version &> /dev/null; then
             COMPOSE_CMD="$CONTAINER_CMD compose"
-            COMPOSE_FILE="docker-compose.yml"
-            log_info "Docker + Docker Compose V2 사용"
         else
             log_error "Docker Compose가 설치되지 않음"
         fi
     else
-        log_error "Podman 또는 Docker가 설치되지 않음"
+        log_error "Docker가 설치되지 않음"
     fi
 
     # 서비스 실행

@@ -30,7 +30,7 @@ log_info "🚀 이미지 변환기 프로젝트 셋업 시작 (by TaeJi Kim)"
 # 설치 모드 선택
 echo "설치 모드를 선택하세요:"
 echo "1) 일반 설치 (Python 가상환경 사용)"
-echo "2) 컨테이너 설치 (Docker/Podman 사용)"
+echo "2) 컨테이너 설치 (Docker 사용)"
 echo "3) 문제 해결 모드 (의존성 문제 해결)"
 read -p "선택 (기본값: 1): " setup_mode
 
@@ -148,37 +148,30 @@ EOF
 elif [ "$setup_mode" = "2" ]; then
     log_info "🔧 컨테이너 기반 설치를 시작합니다..."
     
-    # 컨테이너 런타임 감지 (Podman 우선, Docker 대체)
+    # 컨테이너 런타임 감지 (Docker)
     CONTAINER_CMD=""
 
-    if command -v podman &> /dev/null; then
-        CONTAINER_CMD="podman"
-        log_info "Podman을 사용합니다."
-    elif command -v docker &> /dev/null; then
+    if command -v docker &> /dev/null; then
         CONTAINER_CMD="docker"
         log_info "Docker를 사용합니다."
     else
-        log_error "⚠️ Podman 또는 Docker가 설치되어 있지 않습니다. 컨테이너 런타임을 설치하고 다시 시도하세요."
+        log_error "⚠️ Docker가 설치되어 있지 않습니다. 컨테이너 런타임을 설치하고 다시 시도하세요."
     fi
 
-    # docker-compose.yml 또는 podman-compose.yml 파일 확인
+    # docker-compose.yml 파일 확인
     if [ -f "docker-compose.yml" ]; then
         COMPOSE_FILE="docker-compose.yml"
-    elif [ -f "podman-compose.yml" ]; then
-        COMPOSE_FILE="podman-compose.yml"
     else
-        log_error "⚠️ docker-compose.yml 또는 podman-compose.yml 파일이 없습니다. 컴포즈 파일을 생성하고 다시 시도하세요."
+        log_error "⚠️ docker-compose.yml 파일이 없습니다. 컴포즈 파일을 생성하고 다시 시도하세요."
     fi
 
     # 컴포즈 명령어 결정
-    if [ "$CONTAINER_CMD" = "podman" ] && command -v podman-compose &> /dev/null; then
-        COMPOSE_CMD="podman-compose"
-    elif [ "$CONTAINER_CMD" = "docker" ] && command -v docker-compose &> /dev/null; then
+    if command -v docker-compose &> /dev/null; then
         COMPOSE_CMD="docker-compose"
-    elif [ "$CONTAINER_CMD" = "docker" ] && $CONTAINER_CMD compose version &> /dev/null; then
+    elif $CONTAINER_CMD compose version &> /dev/null; then
         COMPOSE_CMD="$CONTAINER_CMD compose"
     else
-        log_error "⚠️ Docker Compose 또는 Podman Compose가 설치되어 있지 않습니다. 컴포즈 도구를 설치하고 다시 시도하세요."
+        log_error "⚠️ Docker Compose가 설치되어 있지 않습니다. 설치 후 다시 시도하세요."
     fi
 
     log_info "🚀 $COMPOSE_CMD를 사용하여 서비스를 빌드합니다..."
