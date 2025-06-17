@@ -2,6 +2,7 @@ import React, { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, Image as ImageIcon, X } from 'lucide-react';
 import { useImageStore } from '../stores/imageStore';
+import { formatFileSize } from '../utils/formatFileSize';
 import './FileUpload.css';
 
 export const FileUpload: React.FC = () => {
@@ -33,14 +34,6 @@ export const FileUpload: React.FC = () => {
     setSelectedFile(null);
     setConvertedImageUrl(null);
     setError(null);
-  };
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
   return (

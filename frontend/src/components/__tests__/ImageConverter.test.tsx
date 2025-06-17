@@ -22,6 +22,7 @@ Object.defineProperty(global.URL, 'revokeObjectURL', {
 const mockSetProgress = jest.fn();
 const mockSetConvertedImageUrl = jest.fn();
 const mockSetError = jest.fn();
+const mockSetConvertedMetadata = jest.fn();
 
 jest.mock('../../stores/imageStore', () => ({
   useImageStore: () => ({
@@ -42,6 +43,7 @@ jest.mock('../../stores/imageStore', () => ({
     error: null,
     setProgress: mockSetProgress,
     setConvertedImageUrl: mockSetConvertedImageUrl,
+    setConvertedMetadata: mockSetConvertedMetadata,
     setError: mockSetError,
   }),
 }));
@@ -62,7 +64,12 @@ describe('ImageConverter', () => {
 
   test('handles successful conversion', async () => {
     const mockBlob = new Blob(['converted-image'], { type: 'image/webp' });
-    mockConvertImage.mockResolvedValue(mockBlob);
+    mockConvertImage.mockResolvedValue({
+      blob: mockBlob,
+      size: mockBlob.size,
+      width: 100,
+      height: 50,
+    });
 
     render(<ImageConverter />);
 
@@ -99,6 +106,14 @@ describe('ImageConverter', () => {
     // URL.createObjectURL이 호출되었는지 확인
     await waitFor(() => {
       expect(global.URL.createObjectURL).toHaveBeenCalledWith(mockBlob);
+    });
+
+    await waitFor(() => {
+      expect(mockSetConvertedMetadata).toHaveBeenCalledWith({
+        width: 100,
+        height: 50,
+        size: mockBlob.size,
+      });
     });
 
     // 최종 상태 확인 - 실제로 호출되는 값으로 수정

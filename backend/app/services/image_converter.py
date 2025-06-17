@@ -1,6 +1,8 @@
 """
 이미지 변환 서비스
 PIL을 사용한 이미지 형식 변환, 크기 조정, 품질 최적화
+
+TL;DR: Provides high-quality resizing and format conversion.
 """
 
 import asyncio
@@ -99,7 +101,10 @@ class ImageConverter:
             (original_width, original_height),
             (new_width, new_height),
         )
-        return image.resize((new_width, new_height), Image.Resampling.LANCZOS)
+        # ImageOps.contain provides higher quality for large reductions
+        return ImageOps.contain(
+            image, (new_width, new_height), method=Image.Resampling.LANCZOS
+        )
 
     def _convert_format(self, image: Image.Image, request: ConversionRequest) -> bytes:
         """이미지 형식 변환"""
@@ -127,6 +132,7 @@ class ImageConverter:
                 {
                     "quality": request.quality,
                     "optimize": True,
+                    "subsampling": 0,
                 }
             )
         elif request.target_format == "webp":
