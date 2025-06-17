@@ -8,7 +8,7 @@ describe('imageStore', () => {
     expect(result.current.selectedFile).toBeNull();
     expect(result.current.convertedImageUrl).toBeNull();
     expect(result.current.conversionOptions.targetFormat).toBe('webp');
-    expect(result.current.conversionOptions.quality).toBe(85);
+    expect(result.current.conversionOptions.quality).toBe(100);
     expect(result.current.progress.isConverting).toBe(false);
     expect(result.current.progress.progress).toBe(0);
     expect(result.current.progress.message).toBe('');
@@ -45,7 +45,7 @@ describe('imageStore', () => {
     });
 
     expect(result.current.conversionOptions.targetFormat).toBe('jpeg');
-    expect(result.current.conversionOptions.quality).toBe(85); // Should preserve other options
+    expect(result.current.conversionOptions.quality).toBe(100); // Should preserve other options
   });
 
   test('setConversionOptions with multiple options', () => {
@@ -129,7 +129,7 @@ describe('imageStore', () => {
     expect(result.current.selectedFile).toBeNull();
     expect(result.current.convertedImageUrl).toBeNull();
     expect(result.current.conversionOptions.targetFormat).toBe('webp');
-    expect(result.current.conversionOptions.quality).toBe(85);
+    expect(result.current.conversionOptions.quality).toBe(100);
     expect(result.current.progress.isConverting).toBe(false);
     expect(result.current.progress.progress).toBe(0);
     expect(result.current.progress.message).toBe('');

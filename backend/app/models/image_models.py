@@ -14,7 +14,7 @@ class ConversionRequest(BaseModel):
     max_width: Optional[int] = Field(None, gt=0, description="최대 너비")
     max_height: Optional[int] = Field(None, gt=0, description="최대 높이")
     max_size_mb: Optional[float] = Field(None, gt=0, description="최대 파일 크기 (MB)")
-    quality: Optional[int] = Field(85, ge=1, le=100, description="이미지 품질")
+    quality: Optional[int] = Field(100, ge=1, le=100, description="이미지 품질")
 
     @field_validator("target_format")
     @classmethod

@@ -31,7 +31,7 @@ jest.mock('../../stores/imageStore', () => ({
       maxWidth: 1920,
       maxHeight: 1080,
       maxSizeMb: 1,
-      quality: 85,
+      quality: 100,
     },
     progress: {
       isConverting: false,
@@ -91,7 +91,7 @@ describe('ImageConverter', () => {
           maxWidth: 1920,
           maxHeight: 1080,
           maxSizeMb: 1,
-          quality: 85,
+          quality: 100,
         })
       );
     });

@@ -8,7 +8,7 @@ jest.mock('../../stores/imageStore', () => ({
   useImageStore: () => ({
     conversionOptions: {
       targetFormat: 'webp',
-      quality: 85,
+      quality: 100,
       maxWidth: 1920,
       maxHeight: 1080,
       maxSizeMb: 1,
@@ -41,7 +41,7 @@ describe('ConversionOptions', () => {
   test('renders quality slider', () => {
     render(<ConversionOptions />);
 
-    const qualitySlider = screen.getByDisplayValue('85');
+    const qualitySlider = screen.getByDisplayValue('100');
     expect(qualitySlider).toBeInTheDocument();
   });
 
@@ -78,7 +78,7 @@ describe('ConversionOptions', () => {
   test('quality slider change updates options', () => {
     render(<ConversionOptions />);
 
-    const qualitySlider = screen.getByDisplayValue('85');
+    const qualitySlider = screen.getByDisplayValue('100');
     fireEvent.change(qualitySlider, { target: { value: '90' } });
 
     expect(mockSetConversionOptions).toHaveBeenCalledWith(

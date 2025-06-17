@@ -29,12 +29,34 @@ export const ImageConverter: React.FC = () => {
       message: '변환 준비 중...',
     });
 
+    let progressInterval: NodeJS.Timeout | null = null;
+
+    const startProgressAnimation = (
+      start: number,
+      end: number,
+      duration = 2000
+    ) => {
+      const step = (end - start) / (duration / 100);
+      let current = start;
+      progressInterval = setInterval(() => {
+        current += step;
+        setProgress({ progress: Math.min(end, Math.round(current)) });
+        if (current >= end) {
+          if (progressInterval) clearInterval(progressInterval);
+        }
+      }, 100);
+    };
+
     try {
       setProgress({ progress: 25, message: '이미지 업로드 중...' });
+      startProgressAnimation(25, 90, 3000);
 
       const result = await convertImage(selectedFile, conversionOptions);
 
-      setProgress({ progress: 75, message: '변환 완료 처리 중...' });
+      if (progressInterval) {
+        clearInterval(progressInterval);
+      }
+      setProgress({ progress: 90, message: '변환 완료 처리 중...' });
 
       // Blob URL 생성
       const url = URL.createObjectURL(result);
@@ -46,6 +68,9 @@ export const ImageConverter: React.FC = () => {
         message: '변환이 완료되었습니다!',
       });
     } catch (err) {
+      if (progressInterval) {
+        clearInterval(progressInterval);
+      }
       setError(
         err instanceof Error ? err.message : '변환 중 오류가 발생했습니다.'
       );

@@ -27,7 +27,7 @@ async def convert_image(
     max_width: Optional[int] = Form(None),
     max_height: Optional[int] = Form(None),
     max_size_mb: Optional[float] = Form(None),
-    quality: Optional[int] = Form(85),
+    quality: Optional[int] = Form(100),
 ):
     """
     이미지 변환 API

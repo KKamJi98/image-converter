@@ -3,6 +3,7 @@
 PIL을 사용한 이미지 형식 변환, 크기 조정, 품질 최적화
 """
 
+import asyncio
 import io
 import logging
 from typing import Tuple
@@ -23,23 +24,19 @@ class ImageConverter:
     async def convert_image(
         self, image_data: bytes, request: ConversionRequest
     ) -> Tuple[bytes, ImageMetadata]:
-        """
-        이미지 변환 수행
-
-        Args:
-            image_data: 원본 이미지 데이터
-            request: 변환 요청 정보
-
-        Returns:
-            Tuple[bytes, ImageMetadata]: 변환된 이미지 데이터와 메타데이터
-        """
+        """이미지 변환 수행"""
         logger.debug(
             "Starting conversion: target=%s, options=%s",
             request.target_format,
             request.model_dump(),
         )
 
-        # 원본 이미지 로드
+        return await asyncio.to_thread(self._convert_image_sync, image_data, request)
+
+    def _convert_image_sync(
+        self, image_data: bytes, request: ConversionRequest
+    ) -> Tuple[bytes, ImageMetadata]:
+        """블로킹 이미지 변환 로직"""
         original_image = Image.open(io.BytesIO(image_data))
         original_format = (
             original_image.format.lower() if original_image.format else "unknown"
@@ -47,22 +44,16 @@ class ImageConverter:
         original_size = len(image_data)
         original_dimensions = original_image.size
 
-        # EXIF 정보 기반 회전 보정
         original_image = ImageOps.exif_transpose(original_image)
 
-        # 이미지 크기 조정
         processed_image = self._resize_image(original_image, request)
-
-        # 형식 변환 및 품질 조정
         converted_data = self._convert_format(processed_image, request)
 
-        # 파일 크기 제한 적용
         if request.max_size_mb:
-            converted_data = await self._optimize_file_size(
+            converted_data = self._optimize_file_size(
                 processed_image, request, request.max_size_mb
             )
 
-        # 메타데이터 생성
         metadata = ImageMetadata(
             original_format=original_format,
             converted_format=request.target_format,
@@ -124,7 +115,12 @@ class ImageConverter:
             image = background
 
         # 형식별 저장 옵션
-        save_kwargs = {"format": request.target_format.upper()}
+        format_name = (
+            "JPEG"
+            if request.target_format in ["jpg", "jpeg"]
+            else request.target_format.upper()
+        )
+        save_kwargs = {"format": format_name}
 
         if request.target_format in ["jpeg", "jpg"]:
             save_kwargs.update(
@@ -151,14 +147,14 @@ class ImageConverter:
         image.save(output, **save_kwargs)
         return output.getvalue()
 
-    async def _optimize_file_size(
+    def _optimize_file_size(
         self, image: Image.Image, request: ConversionRequest, max_size_mb: float
     ) -> bytes:
         """파일 크기 제한에 맞춰 품질 조정"""
         max_size_bytes = int(max_size_mb * 1024 * 1024)
 
         # 초기 품질로 변환
-        current_quality = request.quality or 85
+        current_quality = request.quality or 100
         logger.debug("Optimizing file size to <= %d bytes", max_size_bytes)
 
         for _ in range(10):  # 최대 10번 시도
