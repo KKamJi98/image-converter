@@ -191,7 +191,7 @@ jobs:
           TAG: ${{ needs.push-to-harbor.outputs.tag }}
         run: |
           git config --global user.email "ci-bot@github.com"
-          git config --global user.name "GitHub Actions"
+          git config --global user.name "ci-bot"
           git add infra/helm-chart/kkamji_values.yaml
           git commit -m "ci: update image tag to $TAG [skip ci]" || echo "No changes"
           git push origin HEAD:${GITHUB_REF#refs/heads/}
