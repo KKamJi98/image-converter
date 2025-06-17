@@ -8,14 +8,14 @@ backend:
     repository: image-converter/backend
     tag: "v1.0.0"
     pullPolicy: IfNotPresent
-  
+
   replicaCount: 2
-  
+
   service:
     type: ClusterIP
     port: 8000
     targetPort: 8000
-  
+
   resources:
     limits:
       cpu: 500m
@@ -23,11 +23,11 @@ backend:
     requests:
       cpu: 250m
       memory: 256Mi
-  
+
   env:
     - name: PYTHONPATH
       value: "/app"
-  
+
   healthcheck:
     enabled: true
     path: /health
@@ -39,14 +39,14 @@ frontend:
     repository: image-converter/frontend
     tag: "v1.0.0"
     pullPolicy: IfNotPresent
-  
+
   replicaCount: 2
-  
+
   service:
     type: ClusterIP
     port: 80
     targetPort: 80
-  
+
   resources:
     limits:
       cpu: 200m
@@ -54,10 +54,12 @@ frontend:
     requests:
       cpu: 100m
       memory: 128Mi
-  
+
   env:
     - name: REACT_APP_API_URL
       value: "/api"
+    - name: REACT_APP_BACKEND_ENDPOINT
+      value: "http://image-converter-backend:8000"
     - name: BACKEND_ENDPOINT
       value: "http://image-converter-backend:8000"
 
@@ -87,7 +89,7 @@ autoscaling:
     maxReplicas: 10
     targetCPUUtilizationPercentage: 70
     targetMemoryUtilizationPercentage: 80
-  
+
   frontend:
     enabled: true
     minReplicas: 2
