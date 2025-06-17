@@ -21,7 +21,12 @@ describe('imageService', () => {
   describe('convertImage', () => {
     test('successful conversion', async () => {
       const mockBlob = new Blob(['test'], { type: 'image/webp' });
-      mockConvertImage.mockResolvedValue(mockBlob);
+      mockConvertImage.mockResolvedValue({
+        blob: mockBlob,
+        size: mockBlob.size,
+        width: 50,
+        height: 50,
+      });
 
       const file = new File(['test'], 'test.png', { type: 'image/png' });
       const options = {
@@ -35,7 +40,12 @@ describe('imageService', () => {
       const result = await convertImage(file, options);
 
       expect(mockConvertImage).toHaveBeenCalledWith(file, options);
-      expect(result).toEqual(mockBlob);
+      expect(result).toEqual({
+        blob: mockBlob,
+        size: mockBlob.size,
+        width: 50,
+        height: 50,
+      });
     });
 
     test('handles conversion error', async () => {
