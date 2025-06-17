@@ -2,22 +2,17 @@ global:
   imageRegistry: harbor.kkamji.net
   imagePullSecrets:
     - name: harbor-credentials
-
 fullnameOverride: image-converter
-
 backend:
   image:
     repository: image-converter/backend
-    tag: "latest"
+    tag: "20250617-063b9c"
     pullPolicy: Always
-
   replicaCount: 1
-
   service:
     type: ClusterIP
     port: 8000
     targetPort: 8000
-
   resources:
     limits:
       cpu: 1000m
@@ -25,30 +20,24 @@ backend:
     requests:
       cpu: 250m
       memory: 256Mi
-
   env:
     - name: PYTHONPATH
       value: "/app"
-
   healthcheck:
     enabled: true
     path: /health
     initialDelaySeconds: 30
     periodSeconds: 10
-
 frontend:
   image:
     repository: image-converter/frontend
-    tag: "latest"
+    tag: "20250617-063b9c"
     pullPolicy: Always
-
   replicaCount: 1
-
   service:
     type: ClusterIP
     port: 80
     targetPort: 80
-
   resources:
     limits:
       cpu: 200m
@@ -56,7 +45,6 @@ frontend:
     requests:
       cpu: 100m
       memory: 128Mi
-
   env:
     - name: REACT_APP_API_URL
       value: "/api"
@@ -64,7 +52,6 @@ frontend:
       value: "http://image-converter-backend:8000"
     - name: BACKEND_ENDPOINT
       value: "http://image-converter-backend:8000"
-
 ingress:
   enabled: true
   className: "nginx"
@@ -85,7 +72,6 @@ ingress:
     - secretName: image-converter-tls
       hosts:
         - image-converter.kkamji.net
-
 autoscaling:
   backend:
     enabled: true
@@ -93,17 +79,14 @@ autoscaling:
     maxReplicas: 3
     targetCPUUtilizationPercentage: 70
     targetMemoryUtilizationPercentage: 80
-
   frontend:
     enabled: true
     minReplicas: 1
     maxReplicas: 3
     targetCPUUtilizationPercentage: 70
-
 podDisruptionBudget:
   enabled: true
   minAvailable: 1
-
 nodeSelector: {}
 tolerations: []
 affinity: {}
