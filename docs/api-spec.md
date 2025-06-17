@@ -207,7 +207,7 @@ curl -X POST "http://localhost:8000/api/v1/convert" \
 - **최대 파일 크기**: 50MB
 - **지원 형식**: WebP, JPEG, JPG, PNG, BMP, TIFF (입력), WebP, JPEG, JPG, PNG (출력)
 - **동시 요청**: 제한 없음 (현재 버전)
-- **요청 타임아웃**: 30초
+- **요청 타임아웃**: 90초 (1분 30초)
 
 ---
 

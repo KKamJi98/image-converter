@@ -13,7 +13,7 @@ const API_BASE_URL =
 // 테스트 환경에서 사용할 수 있도록 export
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 30000, // 30초 타임아웃
+  timeout: 90000, // 90초 타임아웃
 });
 
 export const convertImage = async (
