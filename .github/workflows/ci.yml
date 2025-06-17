@@ -152,7 +152,7 @@ jobs:
           password: ${{ secrets.HARBOR_PASSWORD }}
       - name: Set TAG
         id: meta
-        run: echo "tag=$(date +'%Y%m%d')-${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+        run: echo "tag=$(date +'%Y%m%d')-${GITHUB_SHA::6}" >> "$GITHUB_OUTPUT"
       - name: Push ${{ matrix.component }} image
         uses: docker/build-push-action@v6
         with:
