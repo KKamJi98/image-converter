@@ -27,17 +27,8 @@ log_error() {
 
 log_info "🚀 이미지 변환기 프로젝트 셋업 시작 (by TaeJi Kim)"
 
-# 설치 모드 선택
-echo "설치 모드를 선택하세요:"
-echo "1) 일반 설치 (Python 가상환경 사용)"
-echo "2) 컨테이너 설치 (Docker 사용)"
-echo "3) 문제 해결 모드 (의존성 문제 해결)"
-read -p "선택 (기본값: 1): " setup_mode
-
-# 기본값 설정
-if [ -z "$setup_mode" ]; then
-    setup_mode="1"
-fi
+# 비대화형 설정: 일반 설치 모드 자동 선택
+setup_mode="1"
 
 # 일반 설치 또는 문제 해결 모드
 if [ "$setup_mode" = "1" ] || [ "$setup_mode" = "3" ]; then
@@ -52,10 +43,7 @@ if [ "$setup_mode" = "1" ] || [ "$setup_mode" = "3" ]; then
         log_info "macOS에서는 다음 명령어로 설치할 수 있습니다:"
         log_info "brew install python@3.13"
         echo ""
-        read -p "계속 진행하시겠습니까? (y/n): " choice
-        if [[ "$choice" != "y" && "$choice" != "Y" ]]; then
-            log_error "설치가 취소되었습니다."
-        fi
+        log_warning "Python 버전이 권장사항과 다르지만 계속 진행합니다."
     fi
 
     # uv 설치 확인 (문제 해결 모드에서는 pip 사용)

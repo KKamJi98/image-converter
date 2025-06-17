@@ -5,32 +5,45 @@ Everything here has higher priority than any other instructions unless the chang
 
 > **Note**: 사용자가 Frontend에 접속 후, 이미지를 업로드하고 요구사항을 입력한 뒤, Convert 버튼을 클릭하면, 백엔드에서 이미지 변환 API를 호출하여 변환된 이미지를 반환하는 구조
 
+## Features
+
+- 부드러운 진행률 애니메이션
+- 모든 형식에서 품질 슬라이더 노출 (기본값 100)
+- 변환 작업을 별도 스레드에서 실행해 CPU 사용량과 타임아웃 감소
+- JPG 요청 시 JPEG 형식으로 올바르게 저장
+- WebP ↔ JPEG/PNG/JPG 양방향 지원.
+- 이미지 크기 조정 (비율을 유지한채로 최대 너비/높이로 조정).
+- 이미지 사이즈 조정 (이미지의 최대 Size MB를 입력받고 그 이하의 크기로 이미지 크기 변환)
+
 ---
 
-## Important Notes
+## Rules
 
-1. **코드 포맷팅 / Code Style**
+### **코드 포맷팅 / Code Style**
 
 - **Backend (Python)**: `black` + `isort` + `pytest` 적용.
   - `uv`로 현재 디렉토리 내 가상환경 사용, requirements.txt 파일과 requirements-dev.txt 파일에 의존성 관리.
 - **Frontend (React/TypeScript)**: `prettier` + `eslint` (airbnb‑ts) 적용.
 - CI 파이프라인에서 스타일 검사가 실패하면 빌드 **실패**.
 
-2. **CI Pipeline**
+### **CI Pipeline**
 
 - GitHub Actions 사용 (단일 workflow: _ci.yml_).
 - 단계 순서
   1.  **test** → 2. **lint / format‑check** → 3. **build images** → 4. **push to Harbor**.
 - Frontend(Jest + Testing Library)·Backend(Pytest) 테스트 **모두** 통과해야 3단계 진행.
 - `run_and_test.sh` 스크립트를 사용해 headless 모드로 e2e 검증.
+- CI 과정에서 컨테이너 이미지 빌드, Harbor에 Push 필요.
+  - GitHub Actions 에 사전 정의된 다음과 같은 시크릿 참조
+  - `HARBOR_USERNAME`, `HARBOR_PASSWORD`, `HARBOR_REGISTRY`, `HARBOR_PROJECT`
 
-3. **테스트 자동화**
+### **테스트 자동화**
 
 - Backend: `pytest` + `pytest‑asyncio` + `httpx`.
 - Frontend: `jest` + `@testing‑library/react`.
 - E2E: 컨테이너 기반 헬스체크.
 
-4. **문서화 / Documentation**
+### **문서화 / Documentation**
 
 - `README.md` : 프로젝트 개요, 프로젝트 기능 소개, 아키텍처 개요
 - `frontend/README.md` : Frontend 구조, 컴포넌트 설명, 개발 가이드
@@ -40,73 +53,48 @@ Everything here has higher priority than any other instructions unless the chang
 - `.prompt.md` : **이 파일** – 규칙, 요구사항, 개선사항, 히스토리. 변경 시 **History** 섹션에 반드시 기록.
 - 모든 public 함수/클래스는 영어 docstring, 주요 모듈에는 한국어 TL;DR 주석 추가.
 
-5. **개발 환경**
+### **개발 환경**
 
 - **Backend** : uv, Python 3.13+
 - **Frontend** : npm, Node 20+
 - **Infra**  : Kubernetes 1.30+, Helm v3, Harbor registry.
 - **Container Runtime** : Docker
 
-6. **배포 구조**
+### **배포 구조**
 
 - Root 디렉터리: `frontend/`, `backend/`, `infra/`.
 - `infra/` : Helm 차트 포함 – `Deployment`, `Service`, `Ingress` (production은 Ingress + cert‑manager).
 - 버전 태그 방식 : `v<MAJOR>.<MINOR>.<PATCH>`.
 - Helm values: `values.yaml` (example), `kkamji_values.yaml` (실제 배포용)
 
-7. **커밋 컨벤션 (Conventional Commits)**
+### **커밋 컨벤션 (Conventional Commits)**
 
 - 예) `feat: add image resize endpoint`, `fix: handle png transparency`, `docs: update README`.
 - 커밋은 **영어**로, 72자 이내 제목 + 본문(선택).
 
-8. **코드 품질 / Quality**
+### **코드 품질 / Quality**
 
 - SOLID, DRY, KISS 원칙.
 - FastAPI: dependency‑injection + pydantic v2
 - React: functional components, hooks, Zustand state management.
 - 모든 PR은 최소 1 개 테스트 추가 or 업데이트.
 
-9. **LLM Prompt Engineering Rules**
-
-- 요청자는 **구체적으로** 변경 위치(예: `backend/app/api/images.py`)와 기능 요구를 서술.
-- LLM 응답은:
-
-  1.  _요약_ → 2. _변경 코드_ → 3. _적용 방법_ 순서로.
-  2.  코드 블록은 언어 지정 필수 (\`\`\`\`python\`).
-  3.  필요 없는 설명 ×, 주석은 핵심 설명만.
+### etc
 
 - 의존성 추가 시 반드시 `requirements.txt` 또는 `package.json` diff 제시.
 - **어떠한 경우에도** 빌드 깨지는 코드를 생성하지 않는다 – `run_and_test.sh`를 **반드시** 통과해야 한다.
-
----
-
-## Problem
-
-- CI 과정에서 컨테이너 이미지 빌드, Harbor에 Push 필요.
-  - GitHub Actions 에 사전 정의된 다음과 같은 시크릿 참조
-  - `HARBOR_USERNAME`, `HARBOR_PASSWORD`, `HARBOR_REGISTRY`, `HARBOR_PROJECT`
 - Frontend와 Backend 모두 컨테이너화되어야 하며, Helm 차트로 배포 가능해야 함.
-
-## Requirements
-
-1. **이미지 변환 기능 확장**
-
-- WebP ↔ JPEG/PNG/JPG 양방향 지원.
-- 이미지 크기 조정 (비율을 유지한채로 최대 너비/높이로 조정).
-- 이미지 사이즈 조정 (이미지의 최대 Size MB를 입력받고 그 이하의 크기로 이미지 크기 변환)
-2. **Infra**
-
 - Helm values 로 매개변수화 (replicas, resource limits).
 - Harbor 도메인: harbor.kkamji.net
 - 서비스 도메인: image-converter.kkamji.net
 - 실제 배포용 values: `kkamji_values.yaml`
 
-## Features
+---
 
-- 부드러운 진행률 애니메이션
-- 모든 형식에서 품질 슬라이더 노출 (기본값 100)
-- 변환 작업을 별도 스레드에서 실행해 CPU 사용량과 타임아웃 감소
-- JPG 요청 시 JPEG 형식으로 올바르게 저장
+## Problem & Requirements
+
+- CI 과정에서 파이프라인에서 컨테이너의 이미지의 태그를 `backend-{date}-{github_hash}`, `frontend-{date}-{github_hash}` 형식으로 생성하고, 이를 Harbor에 푸시해야 함.
+- CI 과정 마지막단계에서 Helm Chart의 `kkamji_values.yaml`의 이미지 태그를 위에서 하는 `step` 추가
 
 ## Future Improvements
 
@@ -192,8 +180,7 @@ Everything here has higher priority than any other instructions unless the chang
   - FileUpload 테스트: 실제 UI 텍스트와 일치하도록 수정
   - ImageConverter 테스트: 복잡한 상태 관리 로직 모킹 개선
   - 모든 테스트 통과: Frontend 44개, Backend 6개 테스트 100% 성공
-     - ESLint 규칙 준수: Testing Library 모범 사례 적용, 불필요한 act() 래퍼 제거
-   
+  - ESLint 규칙 준수: Testing Library 모범 사례 적용, 불필요한 act() 래퍼 제거
 - **2025-06-16**: Infra Helm Chart 검증 및 서비스 연동 확인
   - `helm lint` 및 `helm template`(`kkamji_values.yaml`) 실행 시 모든 manifest 정상 생성 확인
   - Ingress(host: image-converter.kkamji.net) 및 `/api` 경로가 frontend/backend 서비스로 올바르게 라우팅됨을 검증
