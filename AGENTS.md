@@ -89,27 +89,24 @@ Everything here has higher priority than any other instructions unless the chang
 
 ## Requirements
 
-1. **테스트 자동화 & CI/CD 향상**
-
-- `run_and_test.sh`가 프론트·백 테스트, lint, build, e2e 전부 실행하도록 개선.
-- 실패 시 1 분 이내 종료 + non‑zero exit code 반환.
-
-2. **이미지 변환 기능 확장**
+1. **이미지 변환 기능 확장**
 
 - WebP ↔ JPEG/PNG/JPG 양방향 지원.
 - 이미지 크기 조정 (비율을 유지한채로 최대 너비/높이로 조정).
 - 이미지 사이즈 조정 (이미지의 최대 Size MB를 입력받고 그 이하의 크기로 이미지 크기 변환)
-
-4. **UI 개선**
-
-- 진행 bar, drag‑and‑drop 업로드, Dark theme.
-
-5. **Infra**
+2. **Infra**
 
 - Helm values 로 매개변수화 (replicas, resource limits).
 - Harbor 도메인: harbor.kkamji.net
 - 서비스 도메인: image-converter.kkamji.net
 - 실제 배포용 values: `kkamji_values.yaml`
+
+## Features
+
+- 부드러운 진행률 애니메이션
+- 모든 형식에서 품질 슬라이더 노출 (기본값 100)
+- 변환 작업을 별도 스레드에서 실행해 CPU 사용량과 타임아웃 감소
+- JPG 요청 시 JPEG 형식으로 올바르게 저장
 
 ## Future Improvements
 
@@ -206,3 +203,9 @@ Everything here has higher priority than any other instructions unless the chang
   - Docker를 기본 컨테이너 런타임으로 변경
   - CI 파이프라인 이미지 빌드/배포 단계 매트릭스 전략 도입
   - README와 스크립트에서 Podman 관련 내용 제거
+- **2025-06-17**: 이미지 변환 품질 및 UI 개선
+  - 변환 진행률 애니메이션 버그 수정(25%에서 100%로 점프하던 문제 해결)
+  - 변환 로직을 스레드에서 실행하여 타임아웃과 CPU 사용량 감소
+  - PNG 등 모든 형식에 품질 슬라이더 적용, 기본값 100으로 통일
+  - JPG 출력 시 JPEG 형식으로 저장하도록 수정
+  - API 문서와 테스트 업데이트

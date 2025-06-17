@@ -44,25 +44,23 @@ export const ConversionOptions: React.FC = () => {
         </div>
       </div>
 
-      {['jpeg', 'jpg', 'webp'].includes(conversionOptions.targetFormat) && (
-        <div className="option-group">
-          <label className="option-label">
-            품질: {conversionOptions.quality}%
-          </label>
-          <input
-            type="range"
-            min="1"
-            max="100"
-            value={conversionOptions.quality || 85}
-            onChange={(e) => handleQualityChange(parseInt(e.target.value, 10))}
-            className="quality-slider"
-          />
-          <div className="slider-labels">
-            <span>낮음</span>
-            <span>높음</span>
-          </div>
+      <div className="option-group">
+        <label className="option-label">
+          품질: {conversionOptions.quality}%
+        </label>
+        <input
+          type="range"
+          min="1"
+          max="100"
+          value={conversionOptions.quality || 100}
+          onChange={(e) => handleQualityChange(parseInt(e.target.value, 10))}
+          className="quality-slider"
+        />
+        <div className="slider-labels">
+          <span>낮음</span>
+          <span>높음</span>
         </div>
-      )}
+      </div>
 
       <div className="option-group">
         <label className="option-label">크기 조정 (선택사항)</label>

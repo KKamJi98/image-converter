@@ -72,7 +72,7 @@ Image Converter API는 이미지 형식 변환, 크기 조정, 품질 최적화 
 | `max_width` | integer | ❌ | 최대 너비 (px) |
 | `max_height` | integer | ❌ | 최대 높이 (px) |
 | `max_size_mb` | float | ❌ | 최대 파일 크기 (MB) |
-| `quality` | integer | ❌ | 이미지 품질 (1-100, 기본값: 85) |
+| `quality` | integer | ❌ | 이미지 품질 (1-100, 기본값: 100) |
 
 **요청 예제 (curl)**
 ```bash

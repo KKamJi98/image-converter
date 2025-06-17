@@ -33,7 +33,7 @@ const initialState = {
   selectedFile: null,
   conversionOptions: {
     targetFormat: 'webp',
-    quality: 85,
+    quality: 100,
   },
   progress: {
     isConverting: false,
