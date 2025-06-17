@@ -62,6 +62,7 @@ async def convert_image(
             max_size_mb=max_size_mb,
             quality=quality,
         )
+        logger.debug("Conversion request params: %s", request.model_dump())
 
         # 이미지 변환 수행
         converted_data, metadata = await converter.convert_image(image_data, request)
@@ -86,6 +87,7 @@ async def convert_image(
         )
 
     except Exception as e:
+        logger.exception("Image conversion failed")
         raise HTTPException(
             status_code=500, detail=f"Image conversion failed: {str(e)}"
         )
