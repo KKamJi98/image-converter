@@ -6,6 +6,7 @@ import { ConversionResult } from '../ConversionResult';
 jest.mock('../../stores/imageStore', () => ({
   useImageStore: () => ({
     convertedImageUrl: 'mock-url',
+    convertedMetadata: { width: 100, height: 50, size: 2048 },
     selectedFile: new File(['test'], 'test.png', { type: 'image/png' }),
     conversionOptions: {
       targetFormat: 'webp',
@@ -37,5 +38,12 @@ describe('ConversionResult', () => {
 
     const newButton = screen.getByText(/다시 변환/i);
     expect(newButton).toBeInTheDocument();
+  });
+
+  test('shows converted image size', () => {
+    render(<ConversionResult />);
+
+    const info = screen.getByText(/결과 크기/i);
+    expect(info).toBeInTheDocument();
   });
 });

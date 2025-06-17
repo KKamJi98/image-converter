@@ -4,8 +4,13 @@ import { useImageStore } from '../stores/imageStore';
 import './ConversionResult.css';
 
 export const ConversionResult: React.FC = () => {
-  const { convertedImageUrl, selectedFile, conversionOptions, reset } =
-    useImageStore();
+  const {
+    convertedImageUrl,
+    selectedFile,
+    convertedMetadata,
+    conversionOptions,
+    reset,
+  } = useImageStore();
 
   const handleDownload = () => {
     if (!convertedImageUrl || !selectedFile) return;
@@ -58,6 +63,15 @@ export const ConversionResult: React.FC = () => {
             {conversionOptions.targetFormat.toUpperCase()}
           </span>
         </div>
+        {convertedMetadata && (
+          <div className="info-item">
+            <span className="info-label">결과 크기:</span>
+            <span className="info-value">
+              {convertedMetadata.width} × {convertedMetadata.height} /{' '}
+              {(convertedMetadata.size / 1024).toFixed(1)}KB
+            </span>
+          </div>
+        )}
         {conversionOptions.quality && (
           <div className="info-item">
             <span className="info-label">품질:</span>

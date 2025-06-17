@@ -16,6 +16,7 @@ export const ImageConverter: React.FC = () => {
     error,
     setProgress,
     setConvertedImageUrl,
+    setConvertedMetadata,
     setError,
   } = useImageStore();
 
@@ -59,8 +60,13 @@ export const ImageConverter: React.FC = () => {
       setProgress({ progress: 90, message: '변환 완료 처리 중...' });
 
       // Blob URL 생성
-      const url = URL.createObjectURL(result);
+      const url = URL.createObjectURL(result.blob);
       setConvertedImageUrl(url);
+      setConvertedMetadata({
+        width: result.width,
+        height: result.height,
+        size: result.size,
+      });
 
       setProgress({
         isConverting: false,

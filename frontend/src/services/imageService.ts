@@ -16,10 +16,17 @@ export const apiClient = axios.create({
   timeout: 90000, // 90초 타임아웃
 });
 
+export interface ConvertedImage {
+  blob: Blob;
+  size: number;
+  width: number;
+  height: number;
+}
+
 export const convertImage = async (
   file: File,
   options: ConversionOptions
-): Promise<Blob> => {
+): Promise<ConvertedImage> => {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('target_format', options.targetFormat);
@@ -48,7 +55,20 @@ export const convertImage = async (
       responseType: 'blob',
     });
 
-    return response.data;
+    const blob = response.data;
+    const size = blob.size;
+
+    const img = await new Promise<HTMLImageElement>((resolve) => {
+      const url = URL.createObjectURL(blob);
+      const image = new Image();
+      image.onload = () => {
+        resolve(image);
+        URL.revokeObjectURL(url);
+      };
+      image.src = url;
+    });
+
+    return { blob, size, width: img.width, height: img.height };
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error('Image conversion failed:', {
