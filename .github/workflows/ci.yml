@@ -4,10 +4,14 @@ on:
   push:
     branches: [main, develop]
     paths:
-      - 'frontend/**'
-      - 'backend/**'
-      - '.github/workflows/*.yml'
+      - "frontend/**"
+      - "backend/**"
+      - ".github/workflows/*.yml"
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test-and-lint:
@@ -172,11 +176,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: push-to-harbor
     permissions:
-      contents: write   # GITHUB_TOKEN 에게 repo 쓰기 권한 부여
+      contents: write # GITHUB_TOKEN 에게 repo 쓰기 권한 부여
     steps:
       - uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}  # 자동 발급된 토큰 사용
+          token: ${{ secrets.GITHUB_TOKEN }} # 자동 발급된 토큰 사용
       - name: Install yq v4
         run: |
           curl -Ls https://github.com/mikefarah/yq/releases/download/v4.45.4/yq_linux_amd64 \
@@ -188,7 +192,7 @@ jobs:
           yq -i '(.backend.image.tag, .frontend.image.tag) = strenv(TAG)' infra/helm-chart/kkamji_values.yaml
       - name: Commit & Push changed values file
         env:
-          TAG: ${{ needs.push-to-harbor.outputs.tag }}
+          TAG: ${{ needs.push-to-harbor.outputs.tag }} # [skip ci]를 사용하면 해당 커밋이 푸시될 때 다시 CI가 트리거되지 않음
         run: |
           git config --global user.email "ci-bot@github.com"
           git config --global user.name "ci-bot"
