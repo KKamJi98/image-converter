@@ -4,11 +4,14 @@ PIL을 사용한 이미지 형식 변환, 크기 조정, 품질 최적화
 """
 
 import io
+import logging
 from typing import Tuple
 
 from PIL import Image, ImageOps
 
 from app.models.image_models import ConversionRequest, ImageMetadata
+
+logger = logging.getLogger(__name__)
 
 
 class ImageConverter:
@@ -30,6 +33,12 @@ class ImageConverter:
         Returns:
             Tuple[bytes, ImageMetadata]: 변환된 이미지 데이터와 메타데이터
         """
+        logger.debug(
+            "Starting conversion: target=%s, options=%s",
+            request.target_format,
+            request.model_dump(),
+        )
+
         # 원본 이미지 로드
         original_image = Image.open(io.BytesIO(image_data))
         original_format = (
@@ -94,6 +103,11 @@ class ImageConverter:
         new_width = int(original_width * ratio)
         new_height = int(original_height * ratio)
 
+        logger.debug(
+            "Resizing image from %s to %s",
+            (original_width, original_height),
+            (new_width, new_height),
+        )
         return image.resize((new_width, new_height), Image.Resampling.LANCZOS)
 
     def _convert_format(self, image: Image.Image, request: ConversionRequest) -> bytes:
@@ -133,6 +147,7 @@ class ImageConverter:
                 }
             )
 
+        logger.debug("Saving image with params: %s", save_kwargs)
         image.save(output, **save_kwargs)
         return output.getvalue()
 
@@ -144,15 +159,18 @@ class ImageConverter:
 
         # 초기 품질로 변환
         current_quality = request.quality or 85
+        logger.debug("Optimizing file size to <= %d bytes", max_size_bytes)
 
         for _ in range(10):  # 최대 10번 시도
             temp_request = ConversionRequest(
                 target_format=request.target_format,
                 quality=current_quality,
             )
+            logger.debug("Trying quality %d", current_quality)
             converted_data = self._convert_format(image, temp_request)
 
             if len(converted_data) <= max_size_bytes:
+                logger.debug("File size %d bytes within limit", len(converted_data))
                 return converted_data
 
             # 품질을 10씩 감소
@@ -165,4 +183,5 @@ class ImageConverter:
             target_format=request.target_format,
             quality=10,
         )
+        logger.debug("Fallback to minimum quality 10")
         return self._convert_format(image, final_request)

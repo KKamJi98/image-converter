@@ -45,17 +45,31 @@ export const convertImage = async (
 
     return response.data;
   } catch (error) {
-    console.error('Image conversion failed:', error);
     if (axios.isAxiosError(error)) {
+      console.error('Image conversion failed:', {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
+
+      const detail = error.response?.data?.detail;
+      if (detail) {
+        throw new Error(detail);
+      }
+
       if (error.response?.status === 400) {
         throw new Error('잘못된 이미지 파일입니다.');
-      } else if (error.response?.status === 500) {
+      }
+      if (error.response?.status === 500) {
         throw new Error('서버에서 이미지 변환 중 오류가 발생했습니다.');
-      } else if (error.code === 'ECONNABORTED') {
+      }
+      if (error.code === 'ECONNABORTED') {
         throw new Error(
           '요청 시간이 초과되었습니다. 파일 크기를 확인해주세요.'
         );
       }
+    } else {
+      console.error('Unexpected error:', error);
     }
 
     throw new Error('이미지 변환 중 오류가 발생했습니다.');
