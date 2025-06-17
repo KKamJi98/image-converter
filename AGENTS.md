@@ -1,9 +1,9 @@
 # Image Converter Project – Prompt Engineering Guidelines
 
-/dev When generating or modifying code for this project, **strictly** follow the rules defined in this `.prompt.md` file.
-Everything here has higher priority than any other instructions unless the change is explicitly approved in the _History_ section.
+> **프로젝트 개요** : 사용자가 Frontend에 접속 후, 이미지를 업로드하고 요구사항을 입력한 뒤, Convert 버튼을 클릭하면, 백엔드에서 이미지 변환 API를 호출하여 변환된 이미지를 반환하는 구조
 
-> **Note**: 사용자가 Frontend에 접속 후, 이미지를 업로드하고 요구사항을 입력한 뒤, Convert 버튼을 클릭하면, 백엔드에서 이미지 변환 API를 호출하여 변환된 이미지를 반환하는 구조
+- 코드를 생성하거나 수정할 때, **이 `AGENTS.md` 파일에 정의된 규칙을 엄격히 준수해야 합니다.**  
+- `Problem & Requirements` 섹션의 요구사항을 `Rules` 규칙에 맞게 해결하고, 해결된 요구사항은 `Features`와 `History`로 이동시켜야 합니다 (내용은 간략하게 요약)
 
 ## Features
 
@@ -94,7 +94,7 @@ Everything here has higher priority than any other instructions unless the chang
 ## Problem & Requirements
 
 - CI 과정에서 파이프라인에서 컨테이너의 이미지의 태그를 `backend-{date}-{github_hash}`, `frontend-{date}-{github_hash}` 형식으로 생성하고, 이를 Harbor에 푸시해야 함.
-- CI 과정 마지막단계에서 Helm Chart의 `kkamji_values.yaml`의 이미지 태그를 위에서 하는 `step` 추가
+- CI 과정 마지막단계에서 Helm Chart의 `kkamji_values.yaml`의 이미지 태그를 위에서 생성한 컨테이너 이미지의 태그로 변경하는 `step` 추가
 
 ## Future Improvements
 
