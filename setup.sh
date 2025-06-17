@@ -119,9 +119,49 @@ EOF
     cd ..
 
     # 프론트엔드 셋업
+    # Node.js 및 NPM 확인
+    log_info "🔧 Node.js 및 NPM 확인 중..."
+    if command -v node &> /dev/null; then
+        NODE_VERSION=$(node -v)
+        log_info "현재 Node.js 버전: $NODE_VERSION"
+        NODE_MAJOR=$(echo $NODE_VERSION | sed 's/v\([0-9]*\).*/\1/')
+        if [ "$NODE_MAJOR" -lt 20 ]; then
+            log_warning "Node.js 20 이상을 권장합니다. 현재 버전: $NODE_VERSION"
+        fi
+    else
+        log_warning "Node.js가 설치되어 있지 않습니다. Node.js 20+ 설치를 권장합니다."
+    fi
+    if ! command -v npm &> /dev/null; then
+        log_error "npm이 설치되어 있지 않습니다. Node.js와 npm을 설치하세요."
+    fi
+
+    # Helm 및 kubectl 확인 (선택 사항)
+    log_info "🔧 Helm 및 kubectl 확인 중..."
+    if command -v helm &> /dev/null; then
+        HELM_VERSION=$(helm version --short)
+        log_info "현재 Helm 버전: $HELM_VERSION"
+        if [[ "$HELM_VERSION" != v3* ]]; then
+            log_warning "Helm v3.x 버전을 권장합니다."
+        fi
+    else
+        log_warning "Helm이 설치되어 있지 않습니다. infra 헬름 배포 시 설치를 권장합니다."
+    fi
+    if command -v kubectl &> /dev/null; then
+        KUBE_VERSION=$(kubectl version --client --short)
+        log_info "현재 kubectl 버전: $KUBE_VERSION"
+    else
+        log_warning "kubectl이 설치되어 있지 않습니다. 쿠버네티스 배포 시 설치를 권장합니다."
+    fi
+
+    # 프론트엔드 셋업
     log_info "🔧 프론트엔드 셋업 중..."
     cd frontend
-    npm install
+    if [ ! -d "node_modules" ]; then
+        log_info "🔧 NPM 의존성 설치 중..."
+        npm ci
+    else
+        log_info "npm 의존성 이미 설치됨"
+    fi
     cd ..
 
     log_success "✅ 셋업 완료!"
