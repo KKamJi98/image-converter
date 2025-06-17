@@ -1,9 +1,14 @@
 import axios from 'axios';
 import { ConversionOptions } from '../stores/imageStore';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
-// REACT_APP_API_URL should be set to the proxy prefix ("/api").
-// Endpoints below omit this prefix to avoid `/api/api` duplication.
+const API_BASE_URL =
+  process.env.REACT_APP_BACKEND_ENDPOINT ||
+  process.env.REACT_APP_API_URL ||
+  '/api';
+// `REACT_APP_BACKEND_ENDPOINT` can point directly to the backend service
+// (e.g. "http://image-converter-backend:8000"). Otherwise `REACT_APP_API_URL`
+// should contain the proxy prefix ("/api"). Endpoints below omit this prefix to
+// avoid `/api/api` duplication.
 
 // 테스트 환경에서 사용할 수 있도록 export
 export const apiClient = axios.create({

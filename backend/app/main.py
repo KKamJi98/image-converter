@@ -17,6 +17,9 @@ app = FastAPI(
     title="Image Converter API",
     description="이미지 형식 변환, 크기 조정, 품질 최적화 API",
     version="0.1.0",
+    openapi_url="/api/openapi.json",
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
 )
 
 # CORS 설정 - 개발 환경용
