@@ -22,7 +22,7 @@
 │   React SPA     │    │   FastAPI       │
 │   (Frontend)    │◄──►│   (Backend)     │
 │                 │    │                 │
-│ • TypeScript    │    │ • Python 3.13+ │
+│ • TypeScript    │    │ • Python 3.13+  │
 │ • Zustand       │    │ • PIL/Pillow    │
 │ • Tailwind CSS  │    │ • Pydantic v2   │
 └─────────────────┘    └─────────────────┘
