@@ -6,7 +6,9 @@ metadata:
     {{- include "image-converter.labels" . | nindent 4 }}
     app.kubernetes.io/component: backend
 spec:
+  {{- if not .Values.autoscaling.backend.enabled }}
   replicas: {{ .Values.backend.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "image-converter.selectorLabels" . | nindent 6 }}

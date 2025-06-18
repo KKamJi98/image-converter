@@ -61,7 +61,7 @@ helm install image-converter ./infra/helm-chart -f custom-values.yaml
 helm install image-converter ./infra/helm-chart \
   --set global.imageRegistry=your-registry.com \
   --set ingress.hosts[0].host=your-domain.com \
-  --set backend.replicaCount=3
+  --set backend.replicaCount=3  # HPA disabled only
 ```
 
 ### 3. 업그레이드
@@ -91,7 +91,7 @@ backend:
     tag: "0.1.0"
     pullPolicy: IfNotPresent
   
-  replicaCount: 2                     # 복제본 수
+  replicaCount: 2                     # 복제본 수 (HPA 사용 시 무시됨)
   
   service:
     type: ClusterIP                   # 서비스 타입
@@ -121,7 +121,7 @@ frontend:
     tag: "0.1.0"
     pullPolicy: IfNotPresent
   
-  replicaCount: 2
+  replicaCount: 2                     # HPA 사용 시 무시됨
   
   service:
     type: ClusterIP
@@ -186,7 +186,7 @@ autoscaling:
 helm install image-converter-dev ./infra/helm-chart \
   --set global.imageRegistry=localhost:5000 \
   --set ingress.hosts[0].host=dev.image-converter.local \
-  --set backend.replicaCount=1 \
+  --set backend.replicaCount=1 \  # 기본 복제본 수
   --set frontend.replicaCount=1
 ```
 
@@ -196,7 +196,7 @@ helm install image-converter-dev ./infra/helm-chart \
 helm install image-converter-staging ./infra/helm-chart \
   --set global.imageRegistry=staging-registry.com \
   --set ingress.hosts[0].host=staging.image-converter.com \
-  --set backend.replicaCount=2 \
+  --set backend.replicaCount=2 \  # 기본 복제본 수
   --set frontend.replicaCount=2
 ```
 
@@ -206,8 +206,8 @@ helm install image-converter-staging ./infra/helm-chart \
 helm install image-converter-prod ./infra/helm-chart \
   --set global.imageRegistry=prod-registry.com \
   --set ingress.hosts[0].host=image-converter.com \
-  --set backend.replicaCount=3 \
-  --set frontend.replicaCount=3 \
+  --set backend.replicaCount=3 \  # HPA가 비활성화된 경우에만 사용
+  --set frontend.replicaCount=3 \  # HPA가 비활성화된 경우에만 사용
   --set autoscaling.backend.enabled=true \
   --set autoscaling.frontend.enabled=true
 ```
