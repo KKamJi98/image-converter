@@ -1,6 +1,7 @@
 import React from 'react';
 import { Download, RotateCcw } from 'lucide-react';
 import { useImageStore } from '../stores/imageStore';
+import { formatFileSize } from '../utils/formatFileSize';
 import './ConversionResult.css';
 
 export const ConversionResult: React.FC = () => {
@@ -68,7 +69,7 @@ export const ConversionResult: React.FC = () => {
             <span className="info-label">결과 크기:</span>
             <span className="info-value">
               {convertedMetadata.width} × {convertedMetadata.height} /{' '}
-              {(convertedMetadata.size / 1024).toFixed(1)}KB
+              {formatFileSize(convertedMetadata.size)}
             </span>
           </div>
         )}

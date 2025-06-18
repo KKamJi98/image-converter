@@ -43,7 +43,7 @@ describe('ConversionResult', () => {
   test('shows converted image size', () => {
     render(<ConversionResult />);
 
-    const info = screen.getByText(/결과 크기/i);
+    const info = screen.getByText('100 × 50 / 2 KB');
     expect(info).toBeInTheDocument();
   });
 });
