@@ -2,7 +2,7 @@
 
 ![Main Page](assets/images/main-page.png)
 
-현대적이고 사용자 친화적인 이미지 변환 및 최적화 도구입니다. React + TypeScript 프론트엔드와 FastAPI 백엔드로 구성되어 있습니다.
+이미지 변환 및 최적화 도구입니다. React + TypeScript 프론트엔드와 FastAPI 백엔드로 구성되어 있습니다.
 
 ## 🚀 주요 기능
 
