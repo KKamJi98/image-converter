@@ -7,7 +7,7 @@ WORKDIR /app
 COPY backend/pyproject.toml ./
 COPY backend/requirements.txt ./
 COPY backend/requirements-dev.txt ./
-COPY backend/app ./app
+COPY app ./app
 
 # Runtime Stage (Alpine)
 FROM python:3.13-alpine
