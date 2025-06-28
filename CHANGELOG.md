@@ -91,3 +91,4 @@
 * Documented Frontend structure (`frontend/README.md`).
 * Documented Backend API structure (`backend/README.md`).
 * Documented Infrastructure structure (`infra/README.md`).
+
