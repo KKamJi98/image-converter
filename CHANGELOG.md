@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.2.0](https://github.com/KKamJi98/image-converter/compare/v1.1.0...v1.2.0) (2025-06-28)
+
+
+### Features
+
+* Improve backend Dockerfile for security and efficiency ([b2bcb4d](https://github.com/KKamJi98/image-converter/commit/b2bcb4de40bc215db0a1d2e2f2b16c06f760e0bc))
+
+
+### Bug Fixes
+
+* Correct Dockerfile COPY path for backend app\n\nThe Dockerfile for the backend was attempting to copy 'backend/app'\nwhich resulted in a build error when the build context was the 'backend'\ndirectory itself. This commit corrects the COPY instruction to\n'COPY app ./app' to properly reference the application directory\nrelative to the Dockerfile's location. ([00369d4](https://github.com/KKamJi98/image-converter/commit/00369d4753bc03359fb8a9d9298de9218c0ed913))
+* Correct Dockerfile COPY paths for backend dependencies\n\nThe Dockerfile for the backend was attempting to copy 'backend/pyproject.toml',\n'backend/requirements.txt', and 'backend/requirements-dev.txt' which resulted\nin build errors when the build context was the 'backend' directory itself.\nThis commit corrects these COPY instructions to properly reference the files\nrelative to the Dockerfile's location. ([c663ecc](https://github.com/KKamJi98/image-converter/commit/c663ecc5305c8f6915506ac8b3662d210fe60452))
+
+
+### Documentation
+
+* Update CHANGELOG.md with 1.0.0 release notes and remove old files ([003bc57](https://github.com/KKamJi98/image-converter/commit/003bc576b37303bcc86611e7735894907a8646f6))
+
 ## [1.1.0](https://github.com/KKamJi98/image-converter/compare/v1.0.0...v1.1.0) (2025-06-28)
 
 
