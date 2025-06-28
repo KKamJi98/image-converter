@@ -3,18 +3,7 @@ FROM python:3.13-slim
 WORKDIR /app
 
 # 시스템 의존성 설치 (curl 추가)
-RUN apt-get update && apt-get install -y \
-    gcc \
-    curl \
-    libjpeg-dev \
-    zlib1g-dev \
-    libfreetype6-dev \
-    liblcms2-dev \
-    libwebp-dev \
-    tcl8.6-dev \
-    tk8.6-dev \
-    python3-tk \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get upgrade -y && apt-get install -y     gcc     curl     libjpeg-dev     zlib1g-dev     libfreetype6-dev     liblcms2-dev     libwebp-dev     tcl8.6-dev     tk8.6-dev     python3-tk     && rm -rf /var/lib/apt/lists/*
 
 # uv 설치
 RUN pip install uv
