@@ -4,9 +4,9 @@ FROM python:3.13-slim AS builder
 WORKDIR /app
 
 # Copy only application code and requirements files
-COPY backend/pyproject.toml ./
-COPY backend/requirements.txt ./
-COPY backend/requirements-dev.txt ./
+COPY pyproject.toml ./
+COPY requirements.txt ./
+COPY requirements-dev.txt ./
 COPY app ./app
 
 # Runtime Stage (Alpine)
