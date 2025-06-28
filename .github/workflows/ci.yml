@@ -97,7 +97,7 @@ jobs:
         with:
           context: ./${{ matrix.component }}
           file: ./${{ matrix.component }}/Dockerfile
-          push: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') }}
+          push: false
           tags: image-converter-${{ matrix.component }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
