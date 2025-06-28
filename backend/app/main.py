@@ -1,6 +1,8 @@
 """
 Image Converter Backend API
 FastAPI 기반 이미지 변환 서비스
+
+# CI 트리거 테스트를 위한 주석 추가
 """
 
 import logging
