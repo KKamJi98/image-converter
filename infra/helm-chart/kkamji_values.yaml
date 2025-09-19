@@ -8,18 +8,18 @@ backend:
     repository: image-converter/backend
     tag: "20250628-645923"
     pullPolicy: Always
-  replicaCount: 1
+  replicaCount: 2
   service:
     type: ClusterIP
     port: 8000
     targetPort: 8000
-  resources:
-    limits:
-      cpu: 1000m
-      memory: 1024Mi
-    requests:
-      cpu: 250m
-      memory: 256Mi
+  # resources:
+  #   limits:
+  #     cpu: 1000m
+  #     memory: 1024Mi
+  #   requests:
+  #     cpu: 250m
+  #     memory: 256Mi
   env:
     - name: PYTHONPATH
       value: "/app"
@@ -33,18 +33,18 @@ frontend:
     repository: image-converter/frontend
     tag: "20250628-645923"
     pullPolicy: Always
-  replicaCount: 1
+  replicaCount: 2
   service:
     type: ClusterIP
     port: 80
     targetPort: 80
-  resources:
-    limits:
-      cpu: 200m
-      memory: 256Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
+  # resources:
+  #   limits:
+  #     cpu: 200m
+  #     memory: 256Mi
+  #   requests:
+  #     cpu: 100m
+  #     memory: 128Mi
   env:
     - name: REACT_APP_API_URL
       value: "/api"
