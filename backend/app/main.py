@@ -10,6 +10,7 @@ import asyncio
 import logging
 import os
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -19,6 +20,27 @@ from app.api import images
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+_executor: ThreadPoolExecutor | None = None
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Manage process-wide threadpool for blocking image work."""
+    global _executor
+    workers = int(os.getenv("IMAGE_WORKERS", "2"))
+    logger.info("Setting default ThreadPoolExecutor with max_workers=%d", workers)
+    _executor = ThreadPoolExecutor(max_workers=max(1, workers))
+    loop = asyncio.get_running_loop()
+    loop.set_default_executor(_executor)
+    try:
+        yield
+    finally:
+        if _executor is not None:
+            logger.info("Shutting down ThreadPoolExecutor")
+            _executor.shutdown(wait=True, cancel_futures=True)
+            _executor = None
+
+
 app = FastAPI(
     title="Image Converter API",
     description="이미지 형식 변환, 크기 조정, 품질 최적화 API",
@@ -26,6 +48,7 @@ app = FastAPI(
     openapi_url="/api/openapi.json",
     docs_url="/api/docs",
     redoc_url="/api/redoc",
+    lifespan=lifespan,
 )
 
 # CORS 설정 - 개발 환경용
@@ -55,24 +78,4 @@ async def health_check():
     return {"status": "healthy"}
 
 
-# 제한된 기본 ThreadPoolExecutor 설정
-_executor: ThreadPoolExecutor | None = None
-
-
-@app.on_event("startup")
-async def on_startup() -> None:
-    global _executor
-    workers = int(os.getenv("IMAGE_WORKERS", "2"))
-    logger.info("Setting default ThreadPoolExecutor with max_workers=%d", workers)
-    _executor = ThreadPoolExecutor(max_workers=max(1, workers))
-    loop = asyncio.get_running_loop()
-    loop.set_default_executor(_executor)
-
-
-@app.on_event("shutdown")
-async def on_shutdown() -> None:
-    global _executor
-    if _executor is not None:
-        logger.info("Shutting down ThreadPoolExecutor")
-        _executor.shutdown(wait=True, cancel_futures=True)
-        _executor = None
+# Lifespan에서 ThreadPoolExecutor를 설정/종료합니다.

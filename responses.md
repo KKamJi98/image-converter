@@ -47,6 +47,15 @@
   - `services/image_converter.py`: `from PIL import Image, ImageFile, ImageOps`로 정렬 수정 및 import 그룹 정리.
 - 결과: 로컬/CI에서 `isort --check-only` 및 `black --check` 통과 확인. 기능 변경 없음(스타일 수정).
 
+---
+
+## Deprecation 해결: FastAPI on_event → lifespan 마이그레이션
+
+- 증상: `app.on_event("startup"|"shutdown")` 사용으로 FastAPI 0.115에서 DeprecationWarning 발생.
+- 조치: `contextlib.asynccontextmanager` 기반 `lifespan` 컨텍스트를 도입하여 ThreadPoolExecutor 설정/종료를 관리.
+- 변경 파일: `backend/app/main.py`
+- 기대 효과: 경고 제거, 최신 FastAPI 권장 패턴 준수, 수명주기 관리 단일화.
+
 ## 추가 메모
 
 - CI 파이프라인은 기존 구조를 유지하되, Helm values 자동 갱신 단계가 포함되어 있습니다. 태그 전략은 Harbor 리포지토리별 동일 태그(`YYYYMMDD-<hash>`)를 사용하며, 리포지토리 분리(`backend/`, `frontend/`)로 충돌을 피합니다.
