@@ -366,13 +366,15 @@ spec:
     backend:
       tmpfs:
         enabled: true
-        medium: null
+        medium: Memory
+        sizeLimit: 1Gi
       env:
         - name: TMPDIR
           value: "/tmp"
         - name: VIPS_TMPDIR
           value: "/tmp"
     ```
+  - 배포 후 `kubectl exec <pod> -- stat -f -c '%T' /tmp` 명령으로 `/tmp` 파일시스템이 `tmpfs`로 출력되는지 확인합니다.
 
 ### 디버깅 명령어
 ```bash
