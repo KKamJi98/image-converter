@@ -112,6 +112,7 @@ backend:
     enabled: false                    # 프로덕션에서는 kkamji_values.yaml에서 true로 설정
     # medium: Memory                 # Memory=tmpfs, 미지정 시 노드 디스크(emptyDir 기본)
     # sizeLimit: 1Gi                  # 선택: tmpfs 용량 제한
+    # initImage: busybox:1.36        # /tmp 퍼미션 조정 init 컨테이너 이미지
   
   healthcheck:                        # 헬스체크 설정
     enabled: true
@@ -368,6 +369,7 @@ spec:
         enabled: true
         medium: Memory
         sizeLimit: 1Gi
+        initImage: busybox:1.36
       env:
         - name: TMPDIR
           value: "/tmp"

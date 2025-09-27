@@ -23,6 +23,19 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.backend.tmpfs.enabled }}
+      initContainers:
+        - name: prepare-tmpfs
+          image: {{ default "busybox:1.36" .Values.backend.tmpfs.initImage }}
+          imagePullPolicy: {{ default "IfNotPresent" .Values.backend.tmpfs.initImagePullPolicy }}
+          command:
+            - sh
+            - -c
+            - "chmod 1777 /tmp"
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      {{- end }}
       containers:
         - name: backend
           image: "{{ .Values.global.imageRegistry }}/{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"

@@ -29,6 +29,7 @@ backend:
     enabled: true
     medium: Memory
     sizeLimit: 1Gi
+    initImage: busybox:1.36
   healthcheck:
     enabled: true
     path: /health
