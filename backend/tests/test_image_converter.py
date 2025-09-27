@@ -84,3 +84,20 @@ async def test_webp_lossless_conversion(converter, sample_image_data):
     assert converted_image.size == original_image.size
     assert list(converted_image.getdata()) == list(original_image.getdata())
     assert metadata.converted_format == "webp"
+
+
+@pytest.mark.asyncio
+async def test_file_size_limit(converter, sample_image_data):
+    """max_size_mb 옵션이 파일 크기를 제한한다"""
+
+    large_image = Image.new("RGB", (800, 600), color=(128, 64, 32))
+    buf = io.BytesIO()
+    large_image.save(buf, format="JPEG", quality=95)
+    jpeg_data = buf.getvalue()
+
+    request = ConversionRequest(target_format="jpeg", quality=95, max_size_mb=0.05)
+
+    converted_data, metadata = await converter.convert_image(jpeg_data, request)
+
+    assert metadata.converted_size <= int(0.05 * 1024 * 1024)
+    assert len(converted_data) == metadata.converted_size
