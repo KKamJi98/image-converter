@@ -6,7 +6,7 @@ fullnameOverride: image-converter
 backend:
   image:
     repository: image-converter/backend
-    tag: "backend-20250927-db1d02"
+    tag: "backend-20250927-e32ff2"
     pullPolicy: Always
   replicaCount: 2
   strategy:
@@ -43,7 +43,7 @@ backend:
 frontend:
   image:
     repository: image-converter/frontend
-    tag: "frontend-20250927-db1d02"
+    tag: "frontend-20250927-e32ff2"
     pullPolicy: Always
   replicaCount: 2
   strategy:
