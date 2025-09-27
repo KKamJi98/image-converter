@@ -5,6 +5,7 @@ WebP, JPEG, PNG 형식 간 변환 및 크기/품질 조정 지원
 
 import io
 import logging
+import time
 from typing import Optional
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
@@ -65,13 +66,20 @@ async def convert_image(
         logger.debug("Conversion request params: %s", request.model_dump())
 
         # 이미지 변환 수행
+        start_time = time.perf_counter()
         converted_data, metadata = await converter.convert_image(image_data, request)
+        duration = time.perf_counter() - start_time
         logger.info(
-            "Conversion complete: %s -> %s (%d -> %d bytes)",
+            "Conversion complete: %s -> %s (%d -> %d bytes) in %.2fs (dims %dx%d -> %dx%d)",
             metadata.original_format,
             metadata.converted_format,
             metadata.original_size,
             metadata.converted_size,
+            duration,
+            metadata.original_dimensions[0],
+            metadata.original_dimensions[1],
+            metadata.converted_dimensions[0],
+            metadata.converted_dimensions[1],
         )
 
         # 변환된 이미지를 스트림으로 반환

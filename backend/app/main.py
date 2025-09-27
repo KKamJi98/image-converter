@@ -20,6 +20,9 @@ from app.api import images
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# pyvips는 내부에서 상세 INFO 로그를 많이 남기므로 노이즈를 줄이기 위해 조정
+logging.getLogger("pyvips").setLevel(logging.WARNING)
+
 _executor: ThreadPoolExecutor | None = None
 
 
