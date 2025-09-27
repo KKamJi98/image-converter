@@ -44,7 +44,7 @@ frontend:
     requests:
       cpu: 250m
       memory: 256Mi
-    limits: {}
+    limits: null
   env:
     - name: REACT_APP_API_URL
       value: "/api"
