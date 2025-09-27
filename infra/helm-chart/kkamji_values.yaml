@@ -18,11 +18,15 @@ backend:
       value: "/app"
     - name: TMPDIR
       value: "/tmp"
+    - name: VIPS_TMPDIR
+      value: "/tmp"
   resources:
     requests:
       cpu: 250m
       memory: 256Mi
-    limits: null
+    limits:
+      cpu: 1500m
+      memory: 1Gi
   tmpfs:
     enabled: true
     medium: null
@@ -45,7 +49,9 @@ frontend:
     requests:
       cpu: 250m
       memory: 256Mi
-    limits: null
+    limits:
+      cpu: 500m
+      memory: 512Mi
   env:
     - name: REACT_APP_API_URL
       value: "/api"
