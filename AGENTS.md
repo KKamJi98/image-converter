@@ -28,6 +28,7 @@
 - 원격 저장소로 푸시하기 전에 프론트엔드/백엔드 테스트와 린트·포맷 체커(`npm run test`, `npm run lint`, `npm run format:check`, `pytest`, `black --check`, `isort --check-only`)가 모두 통과했음을 반드시 확인하고 필요 시 실행 로그를 남긴다.
 - 코드 변경이 있는 영역은 서식 적용(예: `uv run black backend`, `uv run isort backend`, `npm run format`)을 먼저 실행하고, 이어서 동일 도구의 체크 명령(`black --check`, `isort --check-only`, `npm run format:check`)을 반복 실행해 포맷 미적용 상태가 남지 않도록 검증 후 커밋한다.
 - 새로운 작업을 시작하기 전에 항상 `git pull`로 원격 변경 사항을 동기화한 뒤 작업을 진행한다.
+- 프론트엔드 테스트 실행 시 watch 모드로 진입하지 않도록 `CI=true npm test -- <pattern>` 혹은 `npm test -- <pattern> -- --watch=false`를 사용해 CLI 대기 상태를 방지한다.
 
 ### CI 파이프라인
 
