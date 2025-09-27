@@ -2,10 +2,14 @@
 Image Converter Backend API
 FastAPI 기반 이미지 변환 서비스
 
-# CI 트리거 테스트를 위한 주석 추가
+TL;DR: Bounded thread-pool + semaphore-based conversion to avoid
+CPU/memory spikes with large images.
 """
 
 import logging
+import os
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -49,3 +53,26 @@ async def health_check():
     """Health check for Kubernetes probes"""
     logger.info("Health check requested")
     return {"status": "healthy"}
+
+
+# 제한된 기본 ThreadPoolExecutor 설정
+_executor: ThreadPoolExecutor | None = None
+
+
+@app.on_event("startup")
+async def on_startup() -> None:
+    global _executor
+    workers = int(os.getenv("IMAGE_WORKERS", "2"))
+    logger.info("Setting default ThreadPoolExecutor with max_workers=%d", workers)
+    _executor = ThreadPoolExecutor(max_workers=max(1, workers))
+    loop = asyncio.get_running_loop()
+    loop.set_default_executor(_executor)
+
+
+@app.on_event("shutdown")
+async def on_shutdown() -> None:
+    global _executor
+    if _executor is not None:
+        logger.info("Shutting down ThreadPoolExecutor")
+        _executor.shutdown(wait=True, cancel_futures=True)
+        _executor = None
