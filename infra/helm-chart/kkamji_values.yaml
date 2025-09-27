@@ -9,6 +9,11 @@ backend:
     tag: "backend-20250927-697ace"
     pullPolicy: Always
   replicaCount: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 33%
   service:
     type: ClusterIP
     port: 8000
@@ -41,6 +46,11 @@ frontend:
     tag: "frontend-20250927-697ace"
     pullPolicy: Always
   replicaCount: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 33%
   service:
     type: ClusterIP
     port: 80

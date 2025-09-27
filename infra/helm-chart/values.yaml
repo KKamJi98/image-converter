@@ -11,6 +11,12 @@ backend:
 
   replicaCount: 2
 
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 33%
+
   service:
     type: ClusterIP
     port: 8000
@@ -49,6 +55,12 @@ frontend:
     pullPolicy: IfNotPresent
 
   replicaCount: 2
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 33%
 
   service:
     type: ClusterIP
