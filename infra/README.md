@@ -180,12 +180,34 @@ autoscaling:
     maxReplicas: 10                   # 최대 복제본
     targetCPUUtilizationPercentage: 70
     targetMemoryUtilizationPercentage: 80
+    behavior:                         # HPA 동작 커스터마이징 (선택 사항)
+      scaleUp:
+        stabilizationWindowSeconds: 180
+        selectPolicy: Max
+        policies:
+          - type: Percent
+            value: 100
+            periodSeconds: 60
+          - type: Pods
+            value: 2
+            periodSeconds: 60
+      scaleDown:
+        stabilizationWindowSeconds: 180
+        selectPolicy: Min
+        policies:
+          - type: Percent
+            value: 50
+            periodSeconds: 60
+          - type: Pods
+            value: 1
+            periodSeconds: 60
   
   frontend:
     enabled: true
     minReplicas: 2
     maxReplicas: 5
     targetCPUUtilizationPercentage: 70
+    behavior: {}                      # 필요 시 backend와 동일하게 정의
 ```
 
 ## 🔧 환경별 배포

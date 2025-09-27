@@ -13,6 +13,10 @@ spec:
     name: {{ include "image-converter.fullname" . }}-backend
   minReplicas: {{ .Values.autoscaling.backend.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.backend.maxReplicas }}
+  {{- with .Values.autoscaling.backend.behavior }}
+  behavior:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   metrics:
     {{- if .Values.autoscaling.backend.targetCPUUtilizationPercentage }}
     - type: Resource
@@ -47,6 +51,10 @@ spec:
     name: {{ include "image-converter.fullname" . }}-frontend
   minReplicas: {{ .Values.autoscaling.frontend.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.frontend.maxReplicas }}
+  {{- with .Values.autoscaling.frontend.behavior }}
+  behavior:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   metrics:
     {{- if .Values.autoscaling.frontend.targetCPUUtilizationPercentage }}
     - type: Resource
