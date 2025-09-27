@@ -58,61 +58,86 @@ TIMEOUT=60
 BUILD_TIMEOUT=300
 HEALTH_TIMEOUT=60
 
+# 중복 실행 방지를 위한 제어 플래그 (기본값 false)
+SKIP_UNIT_TESTS=${SKIP_UNIT_TESTS:-false}
+SKIP_LINT=${SKIP_LINT:-false}
+SKIP_DOCKER_BUILD=${SKIP_DOCKER_BUILD:-false}
+
 # 1. Backend 테스트
-log_info "Backend 테스트 시작..."
-cd backend
+if [ "$SKIP_UNIT_TESTS" != "true" ]; then
+    log_info "Backend 테스트 시작..."
+    cd backend
 
-if command -v uv &> /dev/null; then
-    log_info "uv로 의존성 설치 중..."
+    if command -v uv &> /dev/null; then
+        log_info "uv로 의존성 설치 중..."
 
-    # 로컬 가상환경 생성 후 의존성 설치
-    if [ ! -d ".venv" ]; then
-        uv venv
+        if [ ! -d ".venv" ]; then
+            uv venv
+        fi
+        uv pip install -r requirements.txt || log_error "Backend 의존성 설치 실패"
+        uv pip install -r requirements-dev.txt || log_error "Backend dev 의존성 설치 실패"
+        source .venv/bin/activate
+
+        log_info "Backend 테스트 실행 중..."
+        timeout $TIMEOUT pytest -v --tb=short || log_error "Backend 테스트 실패"
+
+        if [ "$SKIP_LINT" != "true" ]; then
+            log_info "Backend 코드 포맷팅 검사 중..."
+            timeout $TIMEOUT black --check . || log_error "Backend 코드 포맷팅 검사 실패"
+            timeout $TIMEOUT isort --check-only . || log_error "Backend import 정렬 검사 실패"
+        else
+            log_info "Backend 린트 및 포맷 검사를 건너뜁니다 (SKIP_LINT=true)"
+        fi
+
+        log_success "Backend 테스트 완료"
+    else
+        log_error "uv가 설치되지 않음. Backend 테스트를 실행할 수 없습니다."
     fi
-    uv pip install -r requirements.txt || log_error "Backend 의존성 설치 실패"
-    uv pip install -r requirements-dev.txt || log_error "Backend dev 의존성 설치 실패"
-    source .venv/bin/activate
-    
-    log_info "Backend 테스트 실행 중..."
-    timeout $TIMEOUT pytest -v --tb=short || log_error "Backend 테스트 실패"
-    
-    log_info "Backend 코드 포맷팅 검사 중..."
-    timeout $TIMEOUT black --check . || log_error "Backend 코드 포맷팅 검사 실패"
-    timeout $TIMEOUT isort --check-only . || log_error "Backend import 정렬 검사 실패"
-    
-    log_success "Backend 테스트 완료"
-else
-    log_error "uv가 설치되지 않음. Backend 테스트를 실행할 수 없습니다."
-fi
 
-cd ..
+    cd ..
+else
+    log_info "Backend 단위 테스트를 건너뜁니다 (SKIP_UNIT_TESTS=true)"
+fi
 
 # 2. Frontend 테스트
-log_info "Frontend 테스트 시작..."
-cd frontend
+if [ "$SKIP_UNIT_TESTS" != "true" ]; then
+    log_info "Frontend 테스트 시작..."
+    cd frontend
 
-if command -v npm &> /dev/null; then
-    log_info "NPM 의존성 확인 중..."
-    if [ ! -d "node_modules" ]; then
-        log_info "NPM 의존성 설치 중..."
-        timeout 180 npm ci || log_error "Frontend 의존성 설치 실패"
+    if command -v npm &> /dev/null; then
+        log_info "NPM 의존성 확인 중..."
+        if [ ! -d "node_modules" ]; then
+            log_info "NPM 의존성 설치 중..."
+            timeout 180 npm ci || log_error "Frontend 의존성 설치 실패"
+        fi
+
+        log_info "Frontend 테스트 실행 중..."
+        timeout $TIMEOUT npm run test:ci || log_error "Frontend 테스트 실패"
+
+        if [ "$SKIP_LINT" != "true" ]; then
+            log_info "Frontend 린팅 검사 중..."
+            timeout $TIMEOUT npm run lint || log_error "Frontend 린트 검사 실패"
+            timeout $TIMEOUT npm run format:check || log_error "Frontend 포맷 검사 실패"
+        else
+            log_info "Frontend 린트 및 포맷 검사를 건너뜁니다 (SKIP_LINT=true)"
+        fi
+
+        log_success "Frontend 테스트 완료"
+    else
+        log_error "NPM이 설치되지 않음. Frontend 테스트를 실행할 수 없습니다."
     fi
-    
-    log_info "Frontend 테스트 실행 중..."
-    timeout $TIMEOUT npm run test:ci || log_error "Frontend 테스트 실패"
-    
-    log_info "Frontend 린팅 검사 중..."
-    timeout $TIMEOUT npm run lint || log_error "Frontend 린트 검사 실패"
-    timeout $TIMEOUT npm run format:check || log_error "Frontend 포맷 검사 실패"
-    
-    log_success "Frontend 테스트 완료"
+
+    cd ..
 else
-    log_error "NPM이 설치되지 않음. Frontend 테스트를 실행할 수 없습니다."
+    log_info "Frontend 단위 테스트를 건너뜁니다 (SKIP_UNIT_TESTS=true)"
 fi
 
-cd ..
-
 # 3. 컨테이너 빌드 테스트 (환경에 따른 런타임 선택)
+if [ "$SKIP_DOCKER_BUILD" = "true" ]; then
+    log_info "컨테이너 이미지 빌드 단계를 건너뜁니다 (SKIP_DOCKER_BUILD=true)"
+    exit 0
+fi
+
 log_info "컨테이너 이미지 빌드 테스트 시작..."
 
 CONTAINER_CMD=""

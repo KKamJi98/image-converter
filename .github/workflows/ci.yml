@@ -140,6 +140,8 @@ jobs:
         env:
           CI: true
           GITHUB_ACTIONS: true
+          SKIP_UNIT_TESTS: "true"
+          SKIP_LINT: "true"
         run: |
           chmod +x ./run_and_test.sh
           ./run_and_test.sh
@@ -155,8 +157,8 @@ jobs:
     steps:
       - uses: googleapis/release-please-action@v4
         with:
-          release-type: python
-          package-name: image-converter
+          config-file: .github/release-please-config.json
+          manifest-file: .github/release-please-manifest.json
 
   push-to-harbor:
     runs-on: ubuntu-latest
