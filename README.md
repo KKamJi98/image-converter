@@ -40,6 +40,7 @@
 ### Backend
 - **FastAPI** - 웹 프레임워크
 - **Pillow (PIL)** - 이미지 처리
+- **libvips + pyvips (옵션)** - 저메모리 스트리밍 변환
 - **Pydantic v2** - 데이터 검증
 - **uv** - 의존성 관리
 
@@ -48,6 +49,19 @@
 - **Kubernetes** + **Helm**
 - **GitHub Actions** - CI/CD
 - **Harbor** - 컨테이너 레지스트리
+
+#### CI 이미지 태그
+- CI는 다음 규칙으로 태그를 생성해 Harbor에 푸시합니다.
+  - 백엔드: `backend-YYYYMMDD-<hash>`
+  - 프론트엔드: `frontend-YYYYMMDD-<hash>`
+- 이후 Helm `infra/helm-chart/kkamji_values.yaml`의 각 이미지 태그를 위 값으로 자동 갱신합니다.
+
+## ⚡ 성능/안정성 개선
+
+- 제한된 스레드 풀 + 세마포어로 변환 동시성 제어(스파이크 방지)
+- 대형 이미지도 하드 제한 없이 안전 처리: 입력/출력 스풀링과 JPEG 디코더 `draft()`로 메모리 피크 억제
+- 큰 비율 축소 시 비용 효율적인 리사이즈 경로 사용(thumbnail/reducing_gap)
+- 파일 크기 제한 시 품질 이진 탐색으로 재인코딩 횟수 감소
 
 ## 🚀 빠른 시작
 
@@ -95,6 +109,12 @@ docker-compose up --build
 ```bash
 # 전체 테스트 및 빌드 (CI 환경에서 자동 감지)
 ./run_and_test.sh
+```
+
+#### libvips 경로 활성화(옵션)
+```bash
+# 컨테이너 실행 시 libvips 파이프라인 사용
+docker run -e USE_VIPS=1 -e VIPS_CONCURRENCY=2 ...
 ```
 
 ## 🧪 테스트
@@ -151,6 +171,12 @@ helm install image-converter ./infra/helm-chart \
 
 #### Backend
 - `PYTHONPATH`: Python 모듈 경로 (기본값: `/app`)
+- `IMAGE_WORKERS`: 변환용 ThreadPoolExecutor 워커 수(기본: 2)
+- `CONVERTER_MAX_CONCURRENCY`: 동시에 허용되는 변환 작업 수(기본: 2)
+- `SPOOL_THRESHOLD_MB`: 입력/출력 스풀 임계값(기본: 4)
+- `MAX_IMAGE_PIXELS`: 0 이하면 제한 해제, 필요 시만 지정(기본: 0)
+- `USE_VIPS`: 기본 1(활성). `0|false`로 비활성화하면 Pillow 경로 사용
+- `VIPS_CONCURRENCY`: libvips 내부 스레드 수(컨테이너 기본 2)
 
 #### Frontend
 - `REACT_APP_API_URL`: 백엔드 API URL (기본값: `/api`)
