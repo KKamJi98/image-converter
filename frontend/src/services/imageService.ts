@@ -1,22 +1,18 @@
-import axios, { AxiosProgressEvent } from 'axios';
-
 import { ConversionOptions } from '../stores/imageStore';
 import type { ConversionStage, ConvertedImage } from '../types/conversion';
+import { uploadImage } from '../utils/upload';
 
 const API_BASE_URL =
   process.env.REACT_APP_BACKEND_ENDPOINT ||
   process.env.REACT_APP_API_URL ||
   '/api';
-// `REACT_APP_BACKEND_ENDPOINT` can point directly to the backend service
-// (e.g. "http://image-converter-backend:8000"). Otherwise `REACT_APP_API_URL`
-// should contain the proxy prefix ("/api"). Endpoints below omit this prefix to
-// avoid `/api/api` duplication.
 
-// 테스트 환경에서 사용할 수 있도록 export
-export const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 180000, // 180초(3분) 타임아웃
-});
+const buildEndpoint = (path: string) => {
+  if (API_BASE_URL.endsWith('/')) {
+    return `${API_BASE_URL.slice(0, -1)}${path}`;
+  }
+  return `${API_BASE_URL}${path}`;
+};
 
 export interface ConvertImageCallbacks {
   onStageChange?: (stage: ConversionStage) => void;
@@ -24,10 +20,7 @@ export interface ConvertImageCallbacks {
   onDownloadProgress?: (ratio: number) => void;
 }
 
-const toNumber = (value: string | string[] | undefined): number | undefined => {
-  if (Array.isArray(value)) {
-    return toNumber(value[0]);
-  }
+const toNumber = (value: string | null | undefined): number | undefined => {
   if (!value) {
     return undefined;
   }
@@ -35,26 +28,12 @@ const toNumber = (value: string | string[] | undefined): number | undefined => {
   return Number.isFinite(parsed) ? parsed : undefined;
 };
 
-const toFloat = (value: string | string[] | undefined): number | undefined => {
-  if (Array.isArray(value)) {
-    return toFloat(value[0]);
-  }
+const toFloat = (value: string | null | undefined): number | undefined => {
   if (!value) {
     return undefined;
   }
   const parsed = parseFloat(value);
   return Number.isFinite(parsed) ? parsed : undefined;
-};
-
-const progressRatio = (
-  event: AxiosProgressEvent,
-  fallbackTotal?: number
-): number => {
-  const total = event.total ?? fallbackTotal;
-  if (!total || total <= 0) {
-    return event.loaded > 0 ? 1 : 0;
-  }
-  return Math.min(1, event.loaded / total);
 };
 
 export const convertImage = async (
@@ -82,116 +61,73 @@ export const convertImage = async (
     formData.append('quality', options.quality.toString());
   }
 
-  try {
-    callbacks?.onStageChange?.('upload');
+  callbacks?.onStageChange?.('upload');
 
-    let processingNotified = false;
-    let downloadNotified = false;
+  let downloadNotified = false;
+  const endpoint = buildEndpoint('/v1/convert');
 
-    const markProcessing = () => {
-      if (!processingNotified) {
-        callbacks?.onStageChange?.('processing');
-        processingNotified = true;
-      }
-    };
-
-    const markDownload = () => {
+  const { blob, headers, timings } = await uploadImage(file, {
+    endpoint,
+    formData,
+    fileName: file.name,
+    onUploadComplete: () => {
+      callbacks?.onStageChange?.('processing');
+      callbacks?.onUploadProgress?.(1);
+    },
+    onDownloadStart: () => {
       if (!downloadNotified) {
-        callbacks?.onStageChange?.('download');
         downloadNotified = true;
+        callbacks?.onStageChange?.('download');
       }
-    };
+    },
+    onDownloadProgress: (ratio) => {
+      callbacks?.onDownloadProgress?.(ratio > 0 ? ratio : 0.05);
+    },
+    logLabel: 'convert-image',
+  });
 
-    const response = await apiClient.post('/v1/convert', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-      responseType: 'blob',
-      onUploadProgress: (event) => {
-        const ratio = progressRatio(event, file.size);
-        callbacks?.onUploadProgress?.(ratio);
-        if (ratio >= 1) {
-          markProcessing();
-        }
-      },
-      onDownloadProgress: (event) => {
-        markDownload();
-        const ratio = progressRatio(event);
-        callbacks?.onDownloadProgress?.(ratio);
-      },
-    });
+  callbacks?.onDownloadProgress?.(1);
+  callbacks?.onStageChange?.('finalizing');
 
-    markProcessing();
-    callbacks?.onUploadProgress?.(1);
-    markDownload();
-    callbacks?.onDownloadProgress?.(1);
-    callbacks?.onStageChange?.('finalizing');
+  const originalSize = toNumber(headers.get('x-original-size')) ?? file.size;
+  const convertedSize = toNumber(headers.get('x-converted-size')) ?? blob.size;
+  const compressionRatio =
+    toFloat(headers.get('x-compression-ratio')) ??
+    (originalSize > 0 ? convertedSize / originalSize : 1);
 
-    const blob: Blob = response.data;
-    const headers = response.headers as Record<string, string | undefined>;
+  const width = toNumber(headers.get('x-converted-width')) ?? 0;
+  const height = toNumber(headers.get('x-converted-height')) ?? 0;
+  const originalWidth = toNumber(headers.get('x-original-width')) ?? width;
+  const originalHeight = toNumber(headers.get('x-original-height')) ?? height;
+  const serverProcessTime = toFloat(headers.get('x-process-time'));
+  const targetFormat =
+    headers.get('x-target-format')?.toLowerCase() || options.targetFormat;
 
-    const originalSize = toNumber(headers['x-original-size']) ?? file.size;
-    const convertedSize = toNumber(headers['x-converted-size']) ?? blob.size;
-    const compressionRatio =
-      toFloat(headers['x-compression-ratio']) ??
-      (originalSize > 0 ? convertedSize / originalSize : 1);
+  const processTimeSeconds = serverProcessTime ?? timings.totalMs / 1000 ?? 0;
 
-    const width = toNumber(headers['x-converted-width']) ?? 0;
-    const height = toNumber(headers['x-converted-height']) ?? 0;
-    const originalWidth = toNumber(headers['x-original-width']) ?? width;
-    const originalHeight = toNumber(headers['x-original-height']) ?? height;
-    const processTimeSeconds = toFloat(headers['x-process-time']) ?? 0;
-    const targetFormat =
-      headers['x-target-format']?.toLowerCase() || options.targetFormat;
+  callbacks?.onStageChange?.('done');
 
-    return {
-      blob,
-      size: convertedSize,
-      width,
-      height,
-      originalWidth,
-      originalHeight,
-      originalSize,
-      compressionRatio,
-      processTimeSeconds,
-      targetFormat,
-    };
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error('Image conversion failed:', {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data,
-      });
-
-      const detail = error.response?.data?.detail;
-      if (detail) {
-        throw new Error(detail);
-      }
-
-      if (error.response?.status === 400) {
-        throw new Error('잘못된 이미지 파일입니다.');
-      }
-      if (error.response?.status === 500) {
-        throw new Error('서버에서 이미지 변환 중 오류가 발생했습니다.');
-      }
-      if (error.code === 'ECONNABORTED') {
-        throw new Error(
-          '요청 시간이 3분을 초과했습니다. 파일 크기나 네트워크 상태를 확인해주세요.'
-        );
-      }
-    } else {
-      console.error('Unexpected error:', error);
-    }
-
-    throw new Error('이미지 변환 중 오류가 발생했습니다.');
-  }
+  return {
+    blob,
+    size: convertedSize,
+    width,
+    height,
+    originalWidth,
+    originalHeight,
+    originalSize,
+    compressionRatio,
+    processTimeSeconds,
+    targetFormat,
+  };
 };
 
 export const getSupportedFormats = async () => {
   try {
-    const response = await apiClient.get('/v1/formats');
-    return response.data;
+    const res = await fetch(buildEndpoint('/v1/formats'));
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+    return await res.json();
   } catch (error) {
     console.error('Failed to fetch supported formats:', error);
     return {

@@ -1,16 +1,10 @@
 import { convertImage, getSupportedFormats } from '../imageService';
+import { uploadImage } from '../../utils/upload';
 
-// Mock the entire imageService module
-jest.mock('../imageService', () => ({
-  convertImage: jest.fn(),
-  getSupportedFormats: jest.fn(),
-}));
+jest.mock('../../utils/upload');
 
-const mockConvertImage = convertImage as jest.MockedFunction<
-  typeof convertImage
->;
-const mockGetSupportedFormats = getSupportedFormats as jest.MockedFunction<
-  typeof getSupportedFormats
+const mockedUploadImage = uploadImage as jest.MockedFunction<
+  typeof uploadImage
 >;
 
 describe('imageService', () => {
@@ -19,88 +13,151 @@ describe('imageService', () => {
   });
 
   describe('convertImage', () => {
-    test('successful conversion', async () => {
-      const mockBlob = new Blob(['test'], { type: 'image/webp' });
-      mockConvertImage.mockResolvedValue({
-        blob: mockBlob,
-        size: mockBlob.size,
-        width: 50,
-        height: 50,
-        originalWidth: 100,
-        originalHeight: 100,
-        originalSize: mockBlob.size * 2,
-        compressionRatio: 0.5,
-        processTimeSeconds: 1.5,
-        targetFormat: 'webp',
+    test('returns converted metadata and respects callbacks', async () => {
+      const mockBlob = new Blob(['converted'], { type: 'image/webp' });
+      const headers = new Headers({
+        'x-original-size': '40',
+        'x-converted-size': '20',
+        'x-original-width': '200',
+        'x-original-height': '100',
+        'x-converted-width': '150',
+        'x-converted-height': '80',
+        'x-compression-ratio': '0.5',
+        'x-process-time': '1.2',
+        'x-target-format': 'webp',
       });
 
-      const file = new File(['test'], 'test.png', { type: 'image/png' });
+      mockedUploadImage.mockImplementation(async (_file, opts) => {
+        opts?.onUploadComplete?.(500);
+        opts?.onDownloadStart?.();
+        opts?.onDownloadProgress?.(1, mockBlob.size, mockBlob.size);
+
+        return {
+          blob: mockBlob,
+          headers,
+          timings: {
+            totalMs: 1500,
+            uploadMs: 500,
+            downloadMs: 1000,
+          },
+        };
+      });
+
+      const file = new File(['source'], 'sample.png', { type: 'image/png' });
       const options = {
         targetFormat: 'webp',
-        quality: 85,
+        quality: 90,
         maxWidth: 1920,
         maxHeight: 1080,
         maxSizeMb: 1,
       };
 
-      const result = await convertImage(file, options);
+      const stageSpy = jest.fn();
+      const uploadProgressSpy = jest.fn();
+      const downloadProgressSpy = jest.fn();
 
-      expect(mockConvertImage).toHaveBeenCalledWith(file, options);
+      const result = await convertImage(file, options, {
+        onStageChange: stageSpy,
+        onUploadProgress: uploadProgressSpy,
+        onDownloadProgress: downloadProgressSpy,
+      });
+
+      expect(mockedUploadImage).toHaveBeenCalledTimes(1);
+      const callArgs = mockedUploadImage.mock.calls[0];
+      expect(callArgs[0]).toBe(file);
+      expect(callArgs[1]).toMatchObject({
+        formData: expect.any(FormData),
+        endpoint: expect.stringMatching(/\/v1\/convert$/),
+      });
+
+      expect(stageSpy).toHaveBeenCalledWith('upload');
+      expect(stageSpy).toHaveBeenCalledWith('processing');
+      expect(stageSpy).toHaveBeenCalledWith('download');
+      expect(stageSpy).toHaveBeenCalledWith('finalizing');
+      expect(stageSpy).toHaveBeenCalledWith('done');
+
+      expect(uploadProgressSpy).toHaveBeenCalledWith(1);
+      expect(downloadProgressSpy).toHaveBeenCalledWith(1);
+
       expect(result).toEqual({
         blob: mockBlob,
-        size: mockBlob.size,
-        width: 50,
-        height: 50,
-        originalWidth: 100,
+        size: 20,
+        width: 150,
+        height: 80,
+        originalWidth: 200,
         originalHeight: 100,
-        originalSize: mockBlob.size * 2,
+        originalSize: 40,
         compressionRatio: 0.5,
-        processTimeSeconds: 1.5,
+        processTimeSeconds: 1.2,
         targetFormat: 'webp',
       });
     });
 
-    test('handles conversion error', async () => {
-      const errorMessage = '잘못된 이미지 파일입니다.';
-      mockConvertImage.mockRejectedValue(new Error(errorMessage));
+    test('falls back to timing when headers are missing', async () => {
+      const mockBlob = new Blob(['converted'], { type: 'image/jpeg' });
+      mockedUploadImage.mockImplementation(async (_file, opts) => {
+        opts?.onUploadComplete?.(1000);
+        opts?.onDownloadStart?.();
+        opts?.onDownloadProgress?.(1, mockBlob.size, mockBlob.size);
 
-      const file = new File(['test'], 'test.png', { type: 'image/png' });
-      const options = { targetFormat: 'webp', quality: 85 };
+        return {
+          blob: mockBlob,
+          headers: new Headers(),
+          timings: {
+            totalMs: 2000,
+            uploadMs: 1000,
+            downloadMs: 1000,
+          },
+        };
+      });
 
-      await expect(convertImage(file, options)).rejects.toThrow(errorMessage);
+      const file = new File(['source'], 'sample.png', { type: 'image/png' });
+      const options = { targetFormat: 'jpeg' };
+
+      const result = await convertImage(file, options);
+
+      expect(result.processTimeSeconds).toBeCloseTo(2, 2);
+      expect(result.targetFormat).toBe('jpeg');
+      expect(result.size).toBe(mockBlob.size);
     });
   });
 
   describe('getSupportedFormats', () => {
-    test('successful fetch', async () => {
-      const mockData = {
-        supported_formats: ['webp', 'jpeg', 'png'],
-        input_formats: ['webp', 'jpeg', 'png', 'bmp'],
-      };
+    const originalFetch = global.fetch;
 
-      mockGetSupportedFormats.mockResolvedValue(mockData);
-
-      const result = await getSupportedFormats();
-
-      expect(mockGetSupportedFormats).toHaveBeenCalled();
-      expect(result).toEqual(mockData);
+    afterEach(() => {
+      global.fetch = originalFetch;
     });
 
-    test('handles error and returns default formats', async () => {
-      const defaultFormats = {
-        supported_formats: ['webp', 'jpeg', 'jpg', 'png'],
-        input_formats: ['webp', 'jpeg', 'jpg', 'png', 'bmp', 'tiff'],
-      };
+    test('returns formats from API', async () => {
+      const mockResponse = {
+        ok: true,
+        json: async () => ({
+          supported_formats: ['webp', 'jpeg'],
+          input_formats: ['webp', 'jpeg', 'png'],
+        }),
+      } as unknown as Response;
 
-      mockGetSupportedFormats.mockResolvedValue(defaultFormats);
+      global.fetch = jest.fn().mockResolvedValue(mockResponse);
 
       const result = await getSupportedFormats();
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringMatching(/\/v1\/formats$/)
+      );
+      expect(result.supported_formats).toContain('webp');
+    });
 
-      expect(mockGetSupportedFormats).toHaveBeenCalled();
-      expect(result).toHaveProperty('supported_formats');
-      expect(result).toHaveProperty('input_formats');
-      expect(Array.isArray(result.supported_formats)).toBe(true);
-      expect(Array.isArray(result.input_formats)).toBe(true);
+    test('falls back to defaults on failure', async () => {
+      global.fetch = jest
+        .fn()
+        .mockRejectedValue(
+          new Error('network error')
+        ) as unknown as typeof fetch;
+
+      const result = await getSupportedFormats();
+      expect(result.supported_formats).toEqual(
+        expect.arrayContaining(['webp', 'jpeg', 'jpg', 'png'])
+      );
     });
   });
 });
