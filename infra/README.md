@@ -106,6 +106,12 @@ backend:
       cpu: 250m
       memory: 256Mi
   
+  # 임시 파일 경로를 tmpfs(/tmp)로 마운트하여 libvips의 O_TMPFILE 사용을 보장
+  # 및 임시 I/O 성능 향상. 메모리 사용량 증가에 주의.
+  tmpfs:
+    enabled: false                    # 프로덕션에서는 kkamji_values.yaml에서 true로 설정
+    # sizeLimit: 1Gi                  # 선택: tmpfs 용량 제한
+  
   healthcheck:                        # 헬스체크 설정
     enabled: true
     path: /health
@@ -335,6 +341,22 @@ spec:
    # HPA 상태 확인
    kubectl describe hpa image-converter-backend
    ```
+   - 주의: CPU 기반 HPA(Utilization)는 컨테이너에 cpu requests가 설정되어 있어야 작동합니다.
+     backend의 requests/limits를 비워둔 경우 CPU 기준 자동확장은 비활성화됩니다.
+     필요 시 Memory 기반(TargetAverageValue) 또는 커스텀 메트릭으로 전환하세요.
+
+### "O_TMPFILE failed!" 로그가 보임
+- 원인: 컨테이너 루트 FS/overlayfs가 O_TMPFILE을 지원하지 않음. libvips가 일반 파일 열기로 폴백.
+- 해결: backend Pod에 `/tmp`를 tmpfs(emptyDir: { medium: Memory })로 마운트하고 `TMPDIR=/tmp` 지정.
+  - values 예시(kkamji_values.yaml 적용됨):
+    ```yaml
+    backend:
+      tmpfs:
+        enabled: true
+      env:
+        - name: TMPDIR
+          value: "/tmp"
+    ```
 
 ### 디버깅 명령어
 ```bash
