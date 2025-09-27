@@ -17,16 +17,25 @@ WORKDIR /app
 # Install build dependencies for Python packages (like Pillow) on Alpine
 # These are needed to compile C extensions of Python packages
 RUN apk add --no-cache \
-    gcc \
+    # Build toolchain for wheels/extensions on musl
+    build-base \
+    musl-dev \
+    python3-dev \
+    libffi-dev \
+    pkgconfig \
+    # Pillow image libs
     jpeg-dev \
     zlib-dev \
     freetype-dev \
     lcms2-dev \
     libwebp-dev \
+    tiff-dev \
     tcl-dev \
     tk-dev \
+    # libvips runtime/dev
     vips \
     vips-dev \
+    # misc
     libstdc++ \
     curl \
     && rm -rf /var/cache/apk/*

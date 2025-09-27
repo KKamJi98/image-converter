@@ -117,6 +117,13 @@ docker-compose up --build
 docker run -e USE_VIPS=1 -e VIPS_CONCURRENCY=2 ...
 ```
 
+#### Alpine 빌드 종속성(백엔드 이미지)
+- Dockerfile은 `python:3.13-alpine` 기반으로, 다음 개발 패키지를 함께 설치하여 Pillow/pyvips 빌드 실패를 방지합니다.
+  - build-base, musl-dev, python3-dev, libffi-dev, pkgconfig
+  - jpeg-dev, zlib-dev, freetype-dev, lcms2-dev, libwebp-dev, tiff-dev, tcl-dev, tk-dev
+  - vips, vips-dev
+  - 사유: Alpine에서는 manylinux 휠 사용이 제한적이어서 일부 패키지가 소스 빌드를 시도하며, 이때 `assert.h`(musl-dev), Python 헤더(python3-dev), libffi-dev 등이 필요합니다.
+
 ## 🧪 테스트
 
 ### 전체 테스트 실행

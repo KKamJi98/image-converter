@@ -52,6 +52,13 @@
 - Infra: Kubernetes 1.30+, Helm v3, Harbor
 - Runtime: Docker
 
+### 컨테이너 빌드 메모(Alpine)
+- 백엔드 Dockerfile은 `python:3.13-alpine`을 사용하며 다음 개발 패키지를 설치합니다.
+  - build-base, musl-dev, python3-dev, libffi-dev, pkgconfig
+  - jpeg-dev, zlib-dev, freetype-dev, lcms2-dev, libwebp-dev, tiff-dev, tcl-dev, tk-dev
+  - vips, vips-dev
+- 이유: Alpine( musl ) 환경에서는 일부 파이썬 패키지가 소스 빌드를 시도하므로 C 헤더(`assert.h` 등)와 Python/FFI 헤더가 필요합니다.
+
 ### 배포 구조
 
 - `frontend/`, `backend/`, `infra/` 루트 구성

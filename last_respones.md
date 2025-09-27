@@ -60,3 +60,13 @@
 
 - CI 파이프라인은 기존 구조를 유지하되, Helm values 자동 갱신 단계가 포함되어 있습니다. 태그 전략은 Harbor 리포지토리별 동일 태그(`YYYYMMDD-<hash>`)를 사용하며, 리포지토리 분리(`backend/`, `frontend/`)로 충돌을 피합니다.
 
+---
+
+## Docker Alpine 빌드 오류 해결(pyvips: assert.h 누락)
+
+- 증상: Alpine 기반 백엔드 이미지 빌드 중 `pyvips@2.2.3` 설치 단계에서 `assert.h` 누락으로 `gcc` 빌드 실패.
+- 원인: Alpine은 glibc가 아닌 musl을 사용하며, manylinux 휠이 제공되지 않는 경우 소스 빌드가 필요합니다. 이때 `musl-dev`(assert.h 포함), `python3-dev`, `libffi-dev`, `build-base` 등이 필요합니다.
+- 조치: Dockerfile에 다음 패키지를 추가 설치하여 빌드 통과.
+  - build-base, musl-dev, python3-dev, libffi-dev, pkgconfig
+  - vips, vips-dev(런타임/헤더), Pillow 관련 이미지 라이브러리(jpeg-dev, zlib-dev, freetype-dev, lcms2-dev, libwebp-dev, tiff-dev), tcl-dev, tk-dev
+- 결과: uv 기반 `pip install -r requirements.txt` 성공, 컨테이너 빌드 통과.
