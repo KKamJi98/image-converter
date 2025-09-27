@@ -165,8 +165,6 @@ jobs:
     strategy:
       matrix:
         component: [backend, frontend]
-    outputs:
-      tag: ${{ steps.meta.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
       - name: Set up Docker Buildx
@@ -177,9 +175,9 @@ jobs:
           registry: ${{ secrets.HARBOR_REGISTRY }}
           username: ${{ secrets.HARBOR_USERNAME }}
           password: ${{ secrets.HARBOR_PASSWORD }}
-      - name: Set TAG
+      - name: Set TAG (component-prefixed)
         id: meta
-        run: echo "tag=$(date +'%Y%m%d')-${GITHUB_SHA::6}" >> "$GITHUB_OUTPUT"
+        run: echo "tag=${{ matrix.component }}-$(date +'%Y%m%d')-${GITHUB_SHA::6}" >> "$GITHUB_OUTPUT"
       - name: Push ${{ matrix.component }} image
         uses: docker/build-push-action@v6
         with:
@@ -200,21 +198,28 @@ jobs:
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }} # 자동 발급된 토큰 사용
+      - name: Set component-specific tags
+        id: tags
+        run: |
+          echo "BACKEND_TAG=backend-$(date +'%Y%m%d')-${GITHUB_SHA::6}" >> "$GITHUB_OUTPUT"
+          echo "FRONTEND_TAG=frontend-$(date +'%Y%m%d')-${GITHUB_SHA::6}" >> "$GITHUB_OUTPUT"
       - name: Install yq v4
         run: |
           curl -Ls https://github.com/mikefarah/yq/releases/download/v4.45.4/yq_linux_amd64 \
             -o /usr/local/bin/yq && sudo chmod +x /usr/local/bin/yq
       - name: Update Helm chart image tags
-        env:
-          TAG: ${{ needs.push-to-harbor.outputs.tag }}
         run: |
-          yq -i '(.backend.image.tag, .frontend.image.tag) = strenv(TAG)' infra/helm-chart/kkamji_values.yaml
+          BACKEND_TAG='${{ steps.tags.outputs.BACKEND_TAG }}' \
+          FRONTEND_TAG='${{ steps.tags.outputs.FRONTEND_TAG }}' \
+          yq -i \
+            ".backend.image.tag = strenv(BACKEND_TAG) | .frontend.image.tag = strenv(FRONTEND_TAG)" \
+            infra/helm-chart/kkamji_values.yaml
       - name: Commit & Push changed values file
-        env:
-          TAG: ${{ needs.push-to-harbor.outputs.tag }} # [skip ci]를 사용하면 해당 커밋이 푸시될 때 다시 CI가 트리거되지 않음
         run: |
           git config --global user.email "ci-bot@github.com"
           git config --global user.name "ci-bot"
           git add infra/helm-chart/kkamji_values.yaml
-          git commit -m "ci: update image tag to $TAG [skip ci]" || echo "No changes"
+          BACKEND_TAG='${{ steps.tags.outputs.BACKEND_TAG }}'
+          FRONTEND_TAG='${{ steps.tags.outputs.FRONTEND_TAG }}'
+          git commit -m "ci: update image tags to $BACKEND_TAG, $FRONTEND_TAG [skip ci]" || echo "No changes"
           git push origin HEAD:${GITHUB_REF#refs/heads/}
