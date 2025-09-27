@@ -45,9 +45,18 @@ spec:
             initialDelaySeconds: {{ .Values.backend.healthcheck.initialDelaySeconds }}
             periodSeconds: {{ .Values.backend.healthcheck.periodSeconds }}
           {{- end }}
-          {{- with .Values.backend.resources }}
+          {{- $r := .Values.backend.resources }}
+          {{- if or $r.requests $r.limits }}
           resources:
-            {{- toYaml . | nindent 12 }}
+            {{- with $r.requests }}
+            requests:
+              {{- toYaml . | nindent 14 }}
+            {{- end }}
+            {{- $limits := $r.limits }}
+            {{- if and $limits (gt (len $limits) 0) }}
+            limits:
+              {{- toYaml $limits | nindent 14 }}
+            {{- end }}
           {{- end }}
           env:
             {{- toYaml .Values.backend.env | nindent 12 }}

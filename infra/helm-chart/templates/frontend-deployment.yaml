@@ -43,8 +43,19 @@ spec:
               port: http
             initialDelaySeconds: 5
             periodSeconds: 5
+          {{- $r := .Values.frontend.resources }}
+          {{- if or $r.requests $r.limits }}
           resources:
-            {{- toYaml .Values.frontend.resources | nindent 12 }}
+            {{- with $r.requests }}
+            requests:
+              {{- toYaml . | nindent 14 }}
+            {{- end }}
+            {{- $limits := $r.limits }}
+            {{- if and $limits (gt (len $limits) 0) }}
+            limits:
+              {{- toYaml $limits | nindent 14 }}
+            {{- end }}
+          {{- end }}
           env:
             {{- toYaml .Values.frontend.env | nindent 12 }}
       {{- with .Values.nodeSelector }}
