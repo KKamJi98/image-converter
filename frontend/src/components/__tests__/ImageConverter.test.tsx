@@ -123,17 +123,19 @@ describe('ImageConverter', () => {
     });
 
     await waitFor(() => {
-      expect(mockSetConvertedMetadata).toHaveBeenCalledWith({
-        width: 100,
-        height: 50,
-        size: mockBlob.size,
-        originalWidth: 100,
-        originalHeight: 50,
-        originalSize: mockBlob.size * 2,
-        compressionRatio: 0.5,
-        processTimeSeconds: 4.2,
-        targetFormat: 'webp',
-      });
+      expect(mockSetConvertedMetadata).toHaveBeenCalledWith(
+        expect.objectContaining({
+          width: 100,
+          height: 50,
+          size: mockBlob.size,
+          originalWidth: 100,
+          originalHeight: 50,
+          originalSize: mockBlob.size * 2,
+          compressionRatio: 0.5,
+          processTimeSeconds: expect.any(Number),
+          targetFormat: 'webp',
+        })
+      );
     });
 
     // 최종 상태 확인 - 실제로 호출되는 값으로 수정

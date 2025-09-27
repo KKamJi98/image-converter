@@ -106,6 +106,7 @@ export const ImageConverter: React.FC = () => {
 
       // Blob URL 생성
       const url = URL.createObjectURL(result.blob);
+      const totalDurationSeconds = (performance.now() - startedAt) / 1000;
       setConvertedImageUrl(url);
       setConvertedMetadata({
         width: result.width,
@@ -115,7 +116,7 @@ export const ImageConverter: React.FC = () => {
         originalHeight: result.originalHeight,
         originalSize: result.originalSize,
         compressionRatio: result.compressionRatio,
-        processTimeSeconds: result.processTimeSeconds,
+        processTimeSeconds: totalDurationSeconds,
         targetFormat: result.targetFormat,
       });
 
