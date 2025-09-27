@@ -395,6 +395,9 @@ spec:
     repoURL: https://github.com/KKamJi98/image-converter
     path: infra/helm-chart
     targetRevision: main
+    helm:
+      valueFiles:
+        - kkamji_values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: image-converter
@@ -403,6 +406,8 @@ spec:
       prune: true
       selfHeal: true
 ```
+
+참고: 환경별 오버라이드를 사용하지 않으면 기본 `values.yaml`의 리소스 제한(예: frontend CPU limit 200m)이 적용됩니다. ArgoCD에서 `helm.valueFiles`로 `kkamji_values.yaml`을 포함해 환경 전용 설정을 반영하세요.
 
 ## 📈 성능 튜닝
 
