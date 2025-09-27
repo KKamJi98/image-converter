@@ -6,7 +6,7 @@ fullnameOverride: image-converter
 backend:
   image:
     repository: image-converter/backend
-    tag: "backend-20250927-c98791"
+    tag: "backend-20250927-08e861"
     pullPolicy: Always
   replicaCount: 2
   service:
@@ -37,7 +37,7 @@ backend:
 frontend:
   image:
     repository: image-converter/frontend
-    tag: "frontend-20250927-c98791"
+    tag: "frontend-20250927-08e861"
     pullPolicy: Always
   replicaCount: 2
   service:
