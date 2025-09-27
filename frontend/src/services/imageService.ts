@@ -15,7 +15,7 @@ const API_BASE_URL =
 // 테스트 환경에서 사용할 수 있도록 export
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 90000, // 90초 타임아웃
+  timeout: 180000, // 180초(3분) 타임아웃
 });
 
 export interface ConvertImageCallbacks {
@@ -177,7 +177,7 @@ export const convertImage = async (
       }
       if (error.code === 'ECONNABORTED') {
         throw new Error(
-          '요청 시간이 초과되었습니다. 파일 크기를 확인해주세요.'
+          '요청 시간이 3분을 초과했습니다. 파일 크기나 네트워크 상태를 확인해주세요.'
         );
       }
     } else {
