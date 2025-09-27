@@ -27,7 +27,8 @@ backend:
     limits: null
   tmpfs:
     enabled: true
-    medium: null
+    medium: Memory
+    sizeLimit: 1Gi
   healthcheck:
     enabled: true
     path: /health
