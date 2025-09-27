@@ -45,10 +45,26 @@ spec:
             initialDelaySeconds: {{ .Values.backend.healthcheck.initialDelaySeconds }}
             periodSeconds: {{ .Values.backend.healthcheck.periodSeconds }}
           {{- end }}
+          {{- with .Values.backend.resources }}
           resources:
-            {{- toYaml .Values.backend.resources | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           env:
             {{- toYaml .Values.backend.env | nindent 12 }}
+          {{- if .Values.backend.tmpfs.enabled }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+          {{- end }}
+      {{- if .Values.backend.tmpfs.enabled }}
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory
+            {{- with .Values.backend.tmpfs.sizeLimit }}
+            sizeLimit: {{ . }}
+            {{- end }}
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

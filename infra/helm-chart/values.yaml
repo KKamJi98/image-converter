@@ -28,6 +28,11 @@ backend:
     - name: PYTHONPATH
       value: "/app"
 
+  # Optional tmpfs mount for /tmp to enable O_TMPFILE and speed up temp I/O
+  tmpfs:
+    enabled: false
+    # sizeLimit: 1Gi
+
   healthcheck:
     enabled: true
     path: /health
