@@ -29,6 +29,15 @@ export const ConversionProgress: React.FC = () => {
   const displayRef = React.useRef(progress.elapsedMs);
   const rafRef = React.useRef<number | null>(null);
 
+  const commitElapsed = React.useCallback((value: number) => {
+    const next = Math.max(0, Math.floor(value / 100) * 100);
+    if (next <= displayRef.current) {
+      return;
+    }
+    displayRef.current = next;
+    setDisplayElapsedMs(next);
+  }, []);
+
   React.useEffect(() => {
     const cancelExisting = () => {
       if (rafRef.current !== null) {
@@ -37,63 +46,36 @@ export const ConversionProgress: React.FC = () => {
       }
     };
 
-    const target = progress.elapsedMs;
-
-    if (!progress.isConverting || target <= displayRef.current) {
+    if (!progress.isConverting || !progress.startedAt) {
       cancelExisting();
-      displayRef.current = target;
-      setDisplayElapsedMs(target);
+      displayRef.current = progress.elapsedMs;
+      setDisplayElapsedMs(progress.elapsedMs);
       return;
     }
 
-    if (Math.abs(target - displayRef.current) < 16) {
-      cancelExisting();
-      displayRef.current = target;
-      setDisplayElapsedMs(target);
-      return;
-    }
-
-    const startValue = displayRef.current;
-    const diff = target - startValue;
-    const duration = Math.min(900, Math.max(320, diff * 1.75));
-    let startTime: number | null = null;
-
-    const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
-
-    const step = (timestamp: number) => {
-      if (startTime === null) {
-        startTime = timestamp;
-      }
-
-      const progressRatio = Math.min(1, (timestamp - startTime) / duration);
-      const eased = easeOutCubic(progressRatio);
-      const nextValue = startValue + diff * eased;
-      displayRef.current = nextValue;
-      setDisplayElapsedMs(nextValue);
-
-      if (progressRatio < 1) {
-        rafRef.current = requestAnimationFrame(step);
-      } else {
-        rafRef.current = null;
-        displayRef.current = target;
-        setDisplayElapsedMs(target);
-      }
+    const tick = () => {
+      const runtime = performance.now() - progress.startedAt!;
+      const baseline = Math.max(progress.elapsedMs, runtime);
+      commitElapsed(baseline);
+      rafRef.current = requestAnimationFrame(tick);
     };
 
-    rafRef.current = requestAnimationFrame(step);
+    rafRef.current = requestAnimationFrame(tick);
 
     return cancelExisting;
-  }, [progress.elapsedMs, progress.isConverting]);
+  }, [
+    commitElapsed,
+    progress.elapsedMs,
+    progress.isConverting,
+    progress.startedAt,
+  ]);
 
-  React.useEffect(
-    () => () => {
-      if (rafRef.current !== null) {
-        cancelAnimationFrame(rafRef.current);
-        rafRef.current = null;
-      }
-    },
-    []
-  );
+  React.useEffect(() => {
+    if (!progress.isConverting) {
+      displayRef.current = progress.elapsedMs;
+      setDisplayElapsedMs(progress.elapsedMs);
+    }
+  }, [progress.elapsedMs, progress.isConverting]);
 
   const stageIndex = TIMELINE.indexOf(progress.stage);
   const elapsedSeconds = displayElapsedMs / 1000;
