@@ -13,10 +13,16 @@ backend:
     type: ClusterIP
     port: 8000
     targetPort: 8000
-  resources: {}
   env:
     - name: PYTHONPATH
       value: "/app"
+    - name: TMPDIR
+      value: "/tmp"
+  resources:
+    requests:
+      cpu: 250m
+  tmpfs:
+    enabled: true
   healthcheck:
     enabled: true
     path: /health
