@@ -13,7 +13,7 @@ import os
 import tempfile
 from typing import Tuple
 
-from PIL import Image, ImageOps, ImageFile
+from PIL import Image, ImageFile, ImageOps
 
 try:
     import pyvips  # type: ignore

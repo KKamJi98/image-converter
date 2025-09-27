@@ -6,18 +6,18 @@ TL;DR: Bounded thread-pool + semaphore-based conversion to avoid
 CPU/memory spikes with large images.
 """
 
+import asyncio
 import logging
 import os
-import asyncio
 from concurrent.futures import ThreadPoolExecutor
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api import images
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-from app.api import images
 
 app = FastAPI(
     title="Image Converter API",
