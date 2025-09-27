@@ -86,7 +86,8 @@ export const ConversionResult: React.FC = () => {
           <span className="result-filename">{selectedFile.name}</span> 파일이
           성공적으로
           <br />
-          <span className="result-format">{formatLabel}</span>으로 변환되었습니다.
+          <span className="result-format">{formatLabel}</span>으로
+          변환되었습니다.
         </p>
       </div>
 
@@ -99,8 +100,9 @@ export const ConversionResult: React.FC = () => {
           <div className="summary-item">
             <span className="summary-label">해상도</span>
             <span className="summary-value">
-              {convertedMetadata.originalWidth}×{convertedMetadata.originalHeight}{' '}
-              → {convertedMetadata.width}×{convertedMetadata.height}
+              {convertedMetadata.originalWidth}×
+              {convertedMetadata.originalHeight} → {convertedMetadata.width}×
+              {convertedMetadata.height}
             </span>
           </div>
           <div className="summary-item">
@@ -127,7 +129,9 @@ export const ConversionResult: React.FC = () => {
           {conversionOptions.quality && (
             <div className="summary-item">
               <span className="summary-label">지정 품질</span>
-              <span className="summary-value">{conversionOptions.quality}%</span>
+              <span className="summary-value">
+                {conversionOptions.quality}%
+              </span>
             </div>
           )}
           {(conversionOptions.maxWidth || conversionOptions.maxHeight) && (
@@ -154,11 +158,17 @@ export const ConversionResult: React.FC = () => {
           )}
         </div>
         <div className="result-actions">
-          <button className="btn btn-secondary result-reset-btn" onClick={handleReset}>
+          <button
+            className="btn btn-secondary result-reset-btn"
+            onClick={handleReset}
+          >
             <RotateCcw size={16} />
             다시 변환
           </button>
-          <button className="btn btn-primary result-download-btn" onClick={handleDownload}>
+          <button
+            className="btn btn-primary result-download-btn"
+            onClick={handleDownload}
+          >
             <Download size={16} />
             다운로드
           </button>
