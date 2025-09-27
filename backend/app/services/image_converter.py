@@ -20,6 +20,46 @@ try:
 except Exception:  # pragma: no cover - optional dependency
     pyvips = None
 
+
+_vips_cache_configured = False
+
+
+def _configure_vips_cache() -> None:
+    """Set libvips cache limits to prevent resident memory growth."""
+    global _vips_cache_configured
+    if _vips_cache_configured or pyvips is None:  # type: ignore[name-defined]
+        return
+
+    def _safe_int(env_name: str, default: int) -> int:
+        raw = os.getenv(env_name)
+        if raw is None:
+            return default
+        try:
+            return int(raw)
+        except ValueError:
+            logger.warning(
+                "Invalid value for %s=%s; using default %d", env_name, raw, default
+            )
+            return default
+
+    try:
+        max_mem_mb = _safe_int("VIPS_CACHE_MAX_MEM_MB", 128)
+        if max_mem_mb > 0:
+            pyvips.cache_set_max_mem(max_mem_mb * 1024 * 1024)  # type: ignore[attr-defined]
+
+        max_ops = _safe_int("VIPS_CACHE_MAX_OPS", 200)
+        if max_ops > 0:
+            pyvips.cache_set_max(max_ops)  # type: ignore[attr-defined]
+
+        max_files = _safe_int("VIPS_CACHE_MAX_FILES", 50)
+        if max_files > 0:
+            pyvips.cache_set_max_files(max_files)  # type: ignore[attr-defined]
+    except Exception:
+        logger.exception("Failed to configure pyvips cache constraints")
+    finally:
+        _vips_cache_configured = True
+
+
 from app.models.image_models import ConversionRequest, ImageMetadata
 
 logger = logging.getLogger(__name__)
@@ -47,6 +87,10 @@ class ImageConverter:
         _vips_env = os.getenv("USE_VIPS", "1").strip().lower()
         _vips_enabled = _vips_env not in {"0", "false", "no"}
         self._use_vips = bool(_vips_enabled and pyvips is not None)
+        if self._use_vips:
+            _configure_vips_cache()
+        drop_env = os.getenv("VIPS_CACHE_DROP_AFTER_JOB", "1").strip().lower()
+        self._drop_vips_cache = drop_env in {"1", "true", "yes"}
 
     async def convert_image(
         self, image_data: bytes, request: ConversionRequest
@@ -160,6 +204,11 @@ class ImageConverter:
             converted_dimensions=converted_dimensions,
             compression_ratio=(len(converted_data) / max(1, len(image_data))),
         )
+        if self._drop_vips_cache:
+            try:
+                pyvips.cache_drop_all()  # type: ignore[attr-defined]
+            except Exception:
+                logger.exception("Failed to drop pyvips cache after job")
         return converted_data, metadata
 
     def _resize_vips(

@@ -51,6 +51,11 @@ isort .
 ## 환경 변수
 
 - `PYTHONPATH`: Python 모듈 경로 (기본값: `/app`)
+- `USE_VIPS`: `1`이면 libvips 기반 변환 사용(기본값 1)
+- `VIPS_CACHE_MAX_MEM_MB`: libvips 캐시의 최대 메모리(MiB, 기본값 128)
+- `VIPS_CACHE_MAX_OPS`: 캐시에 보관할 최대 연산 수(기본값 200)
+- `VIPS_CACHE_MAX_FILES`: 캐시에 보관할 최대 파일 수(기본값 50)
+- `VIPS_CACHE_DROP_AFTER_JOB`: `true`/`1` 설정 시 각 변환 후 캐시 플러시(기본값 1)
 
 ## 기술 스택
 
