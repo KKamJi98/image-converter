@@ -100,16 +100,17 @@ backend:
   
   resources:                          # 리소스 제한
     limits:
-      cpu: 500m
-      memory: 512Mi
+      cpu: 1500m                      # MutatingWebhook/LimitRange가 낮은 기본값(예: 200m)을 주입하면 변환이 매우 느려질 수 있음
+      memory: 1Gi
     requests:
       cpu: 250m
       memory: 256Mi
-  
+
   # 임시 파일 경로를 tmpfs(/tmp)로 마운트하여 libvips의 O_TMPFILE 사용을 보장
   # 및 임시 I/O 성능 향상. 메모리 사용량 증가에 주의.
   tmpfs:
     enabled: false                    # 프로덕션에서는 kkamji_values.yaml에서 true로 설정
+    # medium: Memory                 # Memory=tmpfs, 미지정 시 노드 디스크(emptyDir 기본)
     # sizeLimit: 1Gi                  # 선택: tmpfs 용량 제한
   
   healthcheck:                        # 헬스체크 설정
@@ -345,16 +346,29 @@ spec:
      backend의 requests/limits를 비워둔 경우 CPU 기준 자동확장은 비활성화됩니다.
      필요 시 Memory 기반(TargetAverageValue) 또는 커스텀 메트릭으로 전환하세요.
 
+### 변환이 90초 이상 걸리거나 "요청 시간이 초과되었습니다"가 발생
+- 원인: CPU limit가 낮게(예: 200m) 설정되거나, 기본 limit를 주입하는 MutatingWebhook/LimitRange 존재.
+- 해결 절차:
+  1. `kkamji_values.yaml`에서 backend/frontend `resources.limits`를 요청값 이상으로 명시(backend: 1500m/1Gi, frontend: 500m/512Mi 권장).
+  2. 변경 후 ArgoCD Sync 또는 `kubectl rollout restart deployment/image-converter-backend` 실행.
+  3. FastAPI 로그(`Conversion complete ... in X.XXs`)를 확인하여 처리 시간이 90초 이하로 회복됐는지 검증.
+  4. 여전히 느리면 이미지 크기 제한(`MAX_IMAGE_PIXELS`) 또는 리소스 증설을 고려.
+
 ### "O_TMPFILE failed!" 로그가 보임
 - 원인: 컨테이너 루트 FS/overlayfs가 O_TMPFILE을 지원하지 않음. libvips가 일반 파일 열기로 폴백.
-- 해결: backend Pod에 `/tmp`를 tmpfs(emptyDir: { medium: Memory })로 마운트하고 `TMPDIR=/tmp` 지정.
+- 해결: backend Pod에 `/tmp` emptyDir를 마운트하고 `TMPDIR=/tmp`, `VIPS_TMPDIR=/tmp`를 지정.
+  - Memory 기반(tmpfs)을 쓰면 속도는 빠르지만 일부 환경에서 여전히 O_TMPFILE을 지원하지 않을 수 있습니다. 필요 시 emptyDir를 노드 디스크로 사용해도 안전합니다.
+  - INFO 로그가 노이즈일 경우 `pyvips` 로거 레벨을 WARNING으로 낮춰 억제합니다(기본 설정 반영).
   - values 예시(kkamji_values.yaml 적용됨):
     ```yaml
     backend:
       tmpfs:
         enabled: true
+        medium: null
       env:
         - name: TMPDIR
+          value: "/tmp"
+        - name: VIPS_TMPDIR
           value: "/tmp"
     ```
 

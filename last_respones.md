@@ -2,6 +2,12 @@
 
 프로덕션에서 대용량 이미지 변환 시 CPU/메모리 사용 급증으로 Pod OOMKill 또는 CPU throttling이 발생할 수 있는 문제를 다음과 같이 개선했습니다.
 
+## 2025-09-27 개선 사항
+
+- 변환 시간이 90초를 초과하며 프론트엔드에서 타임아웃이 발생하던 문제를 해결하기 위해 backend/ frontend의 CPU limit를 명시적으로 상향 설정(backend 1500m, frontend 500m)하고, 클러스터가 기본 limit(200m)를 주입하더라도 스로틀링이 발생하지 않도록 조치했습니다.
+- `/tmp` emptyDir를 노드 디스크 기반으로 사용하고 `TMPDIR` + `VIPS_TMPDIR`를 `/tmp`로 지정하여 libvips의 임시 파일 경로를 명확히 하였으며, pyvips INFO 로그를 WARNING 레벨로 하향해 `O_TMPFILE failed!` 노이즈를 억제했습니다.
+- FastAPI 변환 엔드포인트에 처리 시간 및 이미지 크기를 포함한 상세 로그를 추가하여 대용량 이미지 처리 지표를 실시간으로 관찰할 수 있도록 했습니다.
+
 ## 핵심 개선점
 
 - 동시 처리 제한: 변환 작업에 `asyncio.Semaphore`와 제한된 기본 ThreadPoolExecutor를 적용해 과도한 동시 인코딩을 방지합니다.
