@@ -1,13 +1,26 @@
 import React, { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, Image as ImageIcon, X } from 'lucide-react';
+import { shallow } from 'zustand/shallow';
 import { useImageStore } from '../stores/imageStore';
 import { formatFileSize } from '../utils/formatFileSize';
+import { useObjectUrl } from '../hooks/useObjectUrl';
 import './FileUpload.css';
 
 export const FileUpload: React.FC = () => {
   const { selectedFile, setSelectedFile, setConvertedImageUrl, setError } =
-    useImageStore();
+    useImageStore(
+      useCallback(
+        (state) => ({
+          selectedFile: state.selectedFile,
+          setSelectedFile: state.setSelectedFile,
+          setConvertedImageUrl: state.setConvertedImageUrl,
+          setError: state.setError,
+        }),
+        []
+      ),
+      shallow
+    );
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
@@ -35,6 +48,8 @@ export const FileUpload: React.FC = () => {
     setConvertedImageUrl(null);
     setError(null);
   };
+
+  const previewUrl = useObjectUrl(selectedFile);
 
   return (
     <div className="file-upload card">
@@ -75,13 +90,9 @@ export const FileUpload: React.FC = () => {
             </button>
           </div>
 
-          {selectedFile.type.startsWith('image/') && (
+          {selectedFile.type.startsWith('image/') && previewUrl && (
             <div className="file-preview">
-              <img
-                src={URL.createObjectURL(selectedFile)}
-                alt="Preview"
-                className="preview-image"
-              />
+              <img src={previewUrl} alt="Preview" className="preview-image" />
             </div>
           )}
         </div>

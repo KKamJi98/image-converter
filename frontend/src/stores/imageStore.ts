@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { createWithEqualityFn } from 'zustand/traditional';
 
 import type { ConversionStage, ConvertedMetadata } from '../types/conversion';
 
@@ -67,7 +67,7 @@ const initialState: Omit<
   error: null,
 };
 
-export const useImageStore = create<ImageState>((set) => ({
+export const useImageStore = createWithEqualityFn<ImageState>()((set) => ({
   ...initialState,
 
   setSelectedFile: (file) => set({ selectedFile: file }),

@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { createWithEqualityFn } from 'zustand/traditional';
 import { persist } from 'zustand/middleware';
 
 type Theme = 'light' | 'dark';
@@ -8,7 +8,7 @@ interface ThemeState {
   toggleTheme: () => void;
 }
 
-export const useThemeStore = create<ThemeState>()(
+export const useThemeStore = createWithEqualityFn<ThemeState>()(
   persist(
     (set) => ({
       theme: 'light',

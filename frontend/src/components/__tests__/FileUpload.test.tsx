@@ -8,6 +8,7 @@ jest.mock('../../stores/imageStore', () => ({
     selectedFile: null,
     setSelectedFile: jest.fn(),
     setError: jest.fn(),
+    setConvertedImageUrl: jest.fn(),
   }),
 }));
 
