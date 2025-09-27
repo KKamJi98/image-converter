@@ -72,95 +72,97 @@ export const ConversionResult: React.FC = () => {
   const sizeDeltaLabel = `${sizeDelta >= 0 ? '+' : '-'}${formatFileSize(Math.abs(sizeDelta))}`;
   const compressionPct = (1 - convertedMetadata.compressionRatio) * 100;
   const processTime = convertedMetadata.processTimeSeconds;
+  const formatLabel = (
+    convertedMetadata.targetFormat || conversionOptions.targetFormat
+  ).toUpperCase();
 
   const shouldWarnPreview = convertedMetadata.size > PREVIEW_SIZE_THRESHOLD;
 
   return (
     <div className="conversion-result card">
       <div className="result-header">
-        <div>
-          <h3 className="result-title">변환 완료</h3>
-          <p className="result-subtitle">
-            {selectedFile.name} 파일이 성공적으로{' '}
-            {convertedMetadata.targetFormat.toUpperCase()} 형식으로
-            변환되었습니다.
-          </p>
+        <h3 className="result-title">변환 완료</h3>
+        <p className="result-subtitle">
+          <span className="result-filename">{selectedFile.name}</span> 파일이
+          성공적으로
+          <br />
+          <span className="result-format">{formatLabel}</span>으로 변환되었습니다.
+        </p>
+      </div>
+
+      <div className="result-meta">
+        <div className="result-summary">
+          <div className="summary-item">
+            <span className="summary-label">결과 형식</span>
+            <strong className="summary-value">{formatLabel}</strong>
+          </div>
+          <div className="summary-item">
+            <span className="summary-label">해상도</span>
+            <span className="summary-value">
+              {convertedMetadata.originalWidth}×{convertedMetadata.originalHeight}{' '}
+              → {convertedMetadata.width}×{convertedMetadata.height}
+            </span>
+          </div>
+          <div className="summary-item">
+            <span className="summary-label">용량 변화</span>
+            <span className="summary-value">
+              {formatFileSize(convertedMetadata.originalSize)} →{' '}
+              {formatFileSize(convertedMetadata.size)} ({sizeDeltaLabel})
+            </span>
+          </div>
+          <div className="summary-item">
+            <span className="summary-label">압축률</span>
+            <span className="summary-value">
+              {compressionPct === 0
+                ? '변경 없음'
+                : `${compressionPct > 0 ? '-' : '+'}${Math.abs(compressionPct).toFixed(1)}%`}
+            </span>
+          </div>
+          <div className="summary-item">
+            <span className="summary-label">처리 시간</span>
+            <span className="summary-value">
+              {processTime > 0 ? `${processTime.toFixed(2)}초` : '확인 중'}
+            </span>
+          </div>
+          {conversionOptions.quality && (
+            <div className="summary-item">
+              <span className="summary-label">지정 품질</span>
+              <span className="summary-value">{conversionOptions.quality}%</span>
+            </div>
+          )}
+          {(conversionOptions.maxWidth || conversionOptions.maxHeight) && (
+            <div className="summary-item">
+              <span className="summary-label">크기 제한</span>
+              <span className="summary-value">
+                {conversionOptions.maxWidth
+                  ? `${conversionOptions.maxWidth}px`
+                  : '자유'}
+                {' × '}
+                {conversionOptions.maxHeight
+                  ? `${conversionOptions.maxHeight}px`
+                  : '자유'}
+              </span>
+            </div>
+          )}
+          {conversionOptions.maxSizeMb && (
+            <div className="summary-item">
+              <span className="summary-label">파일 크기 제한</span>
+              <span className="summary-value">
+                {conversionOptions.maxSizeMb}MB 이하
+              </span>
+            </div>
+          )}
         </div>
         <div className="result-actions">
-          <button className="btn btn-secondary" onClick={handleReset}>
+          <button className="btn btn-secondary result-reset-btn" onClick={handleReset}>
             <RotateCcw size={16} />
             다시 변환
           </button>
-          <button className="btn btn-primary" onClick={handleDownload}>
+          <button className="btn btn-primary result-download-btn" onClick={handleDownload}>
             <Download size={16} />
             다운로드
           </button>
         </div>
-      </div>
-
-      <div className="result-summary">
-        <div className="summary-item">
-          <span className="summary-label">결과 형식</span>
-          <strong className="summary-value">
-            {convertedMetadata.targetFormat.toUpperCase()}
-          </strong>
-        </div>
-        <div className="summary-item">
-          <span className="summary-label">해상도</span>
-          <span className="summary-value">
-            {convertedMetadata.originalWidth}×{convertedMetadata.originalHeight}{' '}
-            → {convertedMetadata.width}×{convertedMetadata.height}
-          </span>
-        </div>
-        <div className="summary-item">
-          <span className="summary-label">용량 변화</span>
-          <span className="summary-value">
-            {formatFileSize(convertedMetadata.originalSize)} →{' '}
-            {formatFileSize(convertedMetadata.size)} ({sizeDeltaLabel})
-          </span>
-        </div>
-        <div className="summary-item">
-          <span className="summary-label">압축률</span>
-          <span className="summary-value">
-            {compressionPct === 0
-              ? '변경 없음'
-              : `${compressionPct > 0 ? '-' : '+'}${Math.abs(compressionPct).toFixed(1)}%`}
-          </span>
-        </div>
-        <div className="summary-item">
-          <span className="summary-label">처리 시간</span>
-          <span className="summary-value">
-            {processTime > 0 ? `${processTime.toFixed(2)}초` : '확인 중'}
-          </span>
-        </div>
-        {conversionOptions.quality && (
-          <div className="summary-item">
-            <span className="summary-label">지정 품질</span>
-            <span className="summary-value">{conversionOptions.quality}%</span>
-          </div>
-        )}
-        {(conversionOptions.maxWidth || conversionOptions.maxHeight) && (
-          <div className="summary-item">
-            <span className="summary-label">크기 제한</span>
-            <span className="summary-value">
-              {conversionOptions.maxWidth
-                ? `${conversionOptions.maxWidth}px`
-                : '자유'}
-              {' × '}
-              {conversionOptions.maxHeight
-                ? `${conversionOptions.maxHeight}px`
-                : '자유'}
-            </span>
-          </div>
-        )}
-        {conversionOptions.maxSizeMb && (
-          <div className="summary-item">
-            <span className="summary-label">파일 크기 제한</span>
-            <span className="summary-value">
-              {conversionOptions.maxSizeMb}MB 이하
-            </span>
-          </div>
-        )}
       </div>
 
       <div className="result-preview">

@@ -1,36 +1,65 @@
 .image-converter {
-  max-width: 800px;
+  max-width: 1080px;
+  width: 100%;
   margin: 0 auto;
+  padding: 2.5rem 3rem;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 2.5rem;
+  background: linear-gradient(145deg, rgba(37, 99, 235, 0.05), rgba(14, 165, 233, 0.02)),
+    var(--bg-primary);
+  border-radius: calc(var(--radius-lg) * 1.1);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: var(--shadow-lg);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+[data-theme='dark'] .image-converter {
+  background: linear-gradient(145deg, rgba(37, 99, 235, 0.08), rgba(14, 165, 233, 0.03)),
+    rgba(15, 23, 42, 0.96);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  box-shadow: var(--shadow-md);
+}
+
+.image-converter:hover {
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.12);
+  transform: translateY(-2px);
 }
 
 .converter-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
   gap: 2rem;
+  align-items: stretch;
 }
 
 .upload-section,
 .options-section {
   display: flex;
   flex-direction: column;
+  gap: 1.25rem;
 }
 
 .convert-section {
-  text-align: center;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .convert-btn {
   font-size: 1.125rem;
-  padding: 1rem 2rem;
-  min-width: 200px;
+  padding: 1rem 2.5rem;
+  min-width: 220px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.convert-btn:disabled {
+  box-shadow: none;
 }
 
 .error-message {
-  background-color: #fef2f2;
-  border: 1px solid #fecaca;
+  background-color: rgba(254, 242, 242, 0.9);
+  border: 1px solid rgba(254, 202, 202, 0.9);
   border-radius: var(--radius-md);
   padding: 1rem;
   color: var(--error-color);
@@ -38,14 +67,35 @@
 }
 
 [data-theme='dark'] .error-message {
-  background-color: #450a0a;
-  border-color: #7f1d1d;
+  background-color: rgba(69, 10, 10, 0.85);
+  border-color: rgba(127, 29, 29, 0.75);
+}
+
+@media (max-width: 1024px) {
+  .image-converter {
+    padding: 2rem;
+    gap: 2rem;
+  }
+
+  .converter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.75rem;
+  }
 }
 
 @media (max-width: 768px) {
+  .image-converter {
+    padding: 1.5rem;
+    gap: 2rem;
+  }
+
   .converter-grid {
     grid-template-columns: 1fr;
     gap: 1.5rem;
+  }
+
+  .convert-section {
+    justify-content: center;
   }
 
   .convert-btn {
