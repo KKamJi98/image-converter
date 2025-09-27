@@ -100,8 +100,8 @@ backend:
   
   resources:                          # 리소스 제한
     limits:
-      cpu: 1500m                      # MutatingWebhook/LimitRange가 낮은 기본값(예: 200m)을 주입하면 변환이 매우 느려질 수 있음
-      memory: 1Gi
+      cpu: 500m
+      memory: 512Mi
     requests:
       cpu: 250m
       memory: 256Mi
@@ -119,6 +119,8 @@ backend:
     initialDelaySeconds: 30
     periodSeconds: 10
 ```
+
+> NOTE: 환경별 values(예: `kkamji_values.yaml`)에서는 `resources.limits: null`로 설정해 클러스터 기본 limit 주입을 차단할 수 있습니다. 필요한 경우 환경 정책에 맞춰 적절한 limit 값을 명시하세요.
 
 ### Frontend 설정
 ```yaml
@@ -349,7 +351,7 @@ spec:
 ### 변환이 90초 이상 걸리거나 "요청 시간이 초과되었습니다"가 발생
 - 원인: CPU limit가 낮게(예: 200m) 설정되거나, 기본 limit를 주입하는 MutatingWebhook/LimitRange 존재.
 - 해결 절차:
-  1. `kkamji_values.yaml`에서 backend/frontend `resources.limits`를 요청값 이상으로 명시(backend: 1500m/1Gi, frontend: 500m/512Mi 권장).
+  1. `kkamji_values.yaml`에서 backend/frontend `resources.limits`를 `null`로 설정해 자동 주입되는 낮은 limit을 제거하거나, 충분히 여유 있는 값으로 명시합니다.
   2. 변경 후 ArgoCD Sync 또는 `kubectl rollout restart deployment/image-converter-backend` 실행.
   3. FastAPI 로그(`Conversion complete ... in X.XXs`)를 확인하여 처리 시간이 90초 이하로 회복됐는지 검증.
   4. 여전히 느리면 이미지 크기 제한(`MAX_IMAGE_PIXELS`) 또는 리소스 증설을 고려.
