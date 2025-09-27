@@ -23,6 +23,10 @@
 - Frontend(React/TS): prettier + eslint(airbnb-ts)
 - CI에서 포맷/린트 실패 시 빌드 실패
 
+### 사전 검증
+
+- 원격 저장소로 푸시하기 전에 프론트엔드/백엔드 테스트와 린트·포맷 체커(`npm run test`, `npm run lint`, `npm run format:check`, `pytest`, `black --check`, `isort --check-only`)가 모두 통과했음을 반드시 확인하고 필요 시 실행 로그를 남긴다.
+
 ### CI 파이프라인
 
 - GitHub Actions 단일 워크플로우(`.github/workflows/ci.yml`)
