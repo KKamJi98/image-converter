@@ -4,3 +4,4 @@ pillow==11.2.1
 python-multipart==0.0.12
 pydantic==2.10.2
 httpx==0.28.1
+pyvips==2.2.3

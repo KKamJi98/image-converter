@@ -25,6 +25,8 @@ RUN apk add --no-cache \
     libwebp-dev \
     tcl-dev \
     tk-dev \
+    vips \
+    vips-dev \
     libstdc++ \
     curl \
     && rm -rf /var/cache/apk/*
@@ -43,6 +45,8 @@ RUN uv pip install --system -r requirements.txt
 
 # Environment variables
 ENV PYTHONPATH=/app
+ENV VIPS_CONCURRENCY=2
+ENV USE_VIPS=1
 
 # Expose port
 EXPOSE 8000
