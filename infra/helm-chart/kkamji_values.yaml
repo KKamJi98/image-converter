@@ -21,6 +21,8 @@ backend:
   resources:
     requests:
       cpu: 250m
+      memory: 256Mi
+    limits: {}
   tmpfs:
     enabled: true
   healthcheck:
