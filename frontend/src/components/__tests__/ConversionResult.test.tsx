@@ -2,48 +2,83 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ConversionResult } from '../ConversionResult';
 
-// Mock zustand stores
+const mockReset = jest.fn();
+const mockUseImageStore = jest.fn();
+
 jest.mock('../../stores/imageStore', () => ({
-  useImageStore: () => ({
-    convertedImageUrl: 'mock-url',
-    convertedMetadata: { width: 100, height: 50, size: 2048 },
-    selectedFile: new File(['test'], 'test.png', { type: 'image/png' }),
-    conversionOptions: {
-      targetFormat: 'webp',
-      quality: 80,
-      maxWidth: 1920,
-      maxHeight: 1080,
-    },
-    resetConversion: jest.fn(),
-  }),
+  useImageStore: () => mockUseImageStore(),
 }));
 
 describe('ConversionResult', () => {
-  test('renders conversion result title', () => {
-    render(<ConversionResult />);
+  beforeEach(() => {
+    jest.clearAllMocks();
 
-    const title = screen.getByText(/변환 완료/i);
-    expect(title).toBeInTheDocument();
+    mockUseImageStore.mockReturnValue({
+      convertedImageUrl: 'mock-url',
+      convertedMetadata: {
+        width: 100,
+        height: 50,
+        size: 2048,
+        originalWidth: 200,
+        originalHeight: 100,
+        originalSize: 4096,
+        compressionRatio: 0.5,
+        processTimeSeconds: 5.25,
+        targetFormat: 'webp',
+      },
+      selectedFile: new File(['test'], 'test.png', { type: 'image/png' }),
+      conversionOptions: {
+        targetFormat: 'webp',
+        quality: 80,
+        maxWidth: 1920,
+        maxHeight: 1080,
+      },
+      reset: mockReset,
+    });
   });
 
-  test('renders download button', () => {
+  test('renders conversion summary and actions', () => {
     render(<ConversionResult />);
 
-    const downloadButton = screen.getByText(/다운로드/i);
-    expect(downloadButton).toBeInTheDocument();
+    expect(screen.getByText(/변환 완료/i)).toBeInTheDocument();
+    expect(screen.getByText(/다운로드/i)).toBeInTheDocument();
+    expect(screen.getByText(/다시 변환/i)).toBeInTheDocument();
+    expect(screen.getByText(/4 KB → 2 KB/i)).toBeInTheDocument();
   });
 
-  test('renders new conversion button', () => {
+  test('renders preview image by default when result is small', () => {
     render(<ConversionResult />);
 
-    const newButton = screen.getByText(/다시 변환/i);
-    expect(newButton).toBeInTheDocument();
+    expect(screen.getByAltText(/변환된 이미지 미리보기/i)).toBeInTheDocument();
   });
 
-  test('shows converted image size', () => {
+  test('shows deferred preview placeholder for very large files', () => {
+    mockUseImageStore.mockReturnValue({
+      convertedImageUrl: 'mock-url',
+      convertedMetadata: {
+        width: 9000,
+        height: 6000,
+        size: 25 * 1024 * 1024,
+        originalWidth: 9000,
+        originalHeight: 6000,
+        originalSize: 30 * 1024 * 1024,
+        compressionRatio: 0.8,
+        processTimeSeconds: 6.5,
+        targetFormat: 'png',
+      },
+      selectedFile: new File(['test'], 'large.tiff', { type: 'image/tiff' }),
+      conversionOptions: {
+        targetFormat: 'png',
+        quality: 90,
+      },
+      reset: mockReset,
+    });
+
     render(<ConversionResult />);
 
-    const info = screen.getByText('100 × 50 / 2 KB');
-    expect(info).toBeInTheDocument();
+    expect(screen.getByText(/대용량 이미지 미리보기/i)).toBeInTheDocument();
+    expect(
+      screen.queryByAltText(/변환된 이미지 미리보기/i)
+    ).not.toBeInTheDocument();
   });
 });

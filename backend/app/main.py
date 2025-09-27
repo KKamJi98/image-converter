@@ -16,6 +16,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import images
+from app.api.images import METADATA_HEADERS
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -55,12 +56,15 @@ app = FastAPI(
 )
 
 # CORS 설정 - 개발 환경용
+CORS_EXPOSE_HEADERS = ["Content-Disposition", *sorted(METADATA_HEADERS)]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],  # Frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=CORS_EXPOSE_HEADERS,
 )
 
 # API 라우터 등록

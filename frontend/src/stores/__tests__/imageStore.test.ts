@@ -10,7 +10,8 @@ describe('imageStore', () => {
     expect(result.current.conversionOptions.targetFormat).toBe('webp');
     expect(result.current.conversionOptions.quality).toBe(100);
     expect(result.current.progress.isConverting).toBe(false);
-    expect(result.current.progress.progress).toBe(0);
+    expect(result.current.progress.stage).toBe('idle');
+    expect(result.current.progress.percent).toBe(0);
     expect(result.current.progress.message).toBe('');
     expect(result.current.error).toBeNull();
   });
@@ -70,11 +71,11 @@ describe('imageStore', () => {
     const { result } = renderHook(() => useImageStore());
 
     act(() => {
-      result.current.setProgress({ isConverting: true, progress: 50 });
+      result.current.setProgress({ isConverting: true, percent: 50 });
     });
 
     expect(result.current.progress.isConverting).toBe(true);
-    expect(result.current.progress.progress).toBe(50);
+    expect(result.current.progress.percent).toBe(50);
     expect(result.current.progress.message).toBe(''); // Should preserve other progress fields
   });
 
@@ -84,13 +85,13 @@ describe('imageStore', () => {
     act(() => {
       result.current.setProgress({
         isConverting: true,
-        progress: 75,
+        percent: 75,
         message: '변환 중...',
       });
     });
 
     expect(result.current.progress.isConverting).toBe(true);
-    expect(result.current.progress.progress).toBe(75);
+    expect(result.current.progress.percent).toBe(75);
     expect(result.current.progress.message).toBe('변환 중...');
   });
 
@@ -117,7 +118,7 @@ describe('imageStore', () => {
         targetFormat: 'jpeg',
         quality: 90,
       });
-      result.current.setProgress({ isConverting: true, progress: 50 });
+      result.current.setProgress({ isConverting: true, percent: 50 });
       result.current.setError('test error');
     });
 
@@ -131,7 +132,8 @@ describe('imageStore', () => {
     expect(result.current.conversionOptions.targetFormat).toBe('webp');
     expect(result.current.conversionOptions.quality).toBe(100);
     expect(result.current.progress.isConverting).toBe(false);
-    expect(result.current.progress.progress).toBe(0);
+    expect(result.current.progress.stage).toBe('idle');
+    expect(result.current.progress.percent).toBe(0);
     expect(result.current.progress.message).toBe('');
     expect(result.current.error).toBeNull();
   });

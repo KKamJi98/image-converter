@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 
+import type { ConversionStage, ConvertedMetadata } from '../types/conversion';
+
 export interface ConversionOptions {
   targetFormat: string;
   maxWidth?: number;
@@ -10,8 +12,11 @@ export interface ConversionOptions {
 
 export interface ConversionProgress {
   isConverting: boolean;
-  progress: number;
+  stage: ConversionStage;
+  percent: number;
   message: string;
+  startedAt: number | null;
+  elapsedMs: number;
 }
 
 interface ImageState {
@@ -19,21 +24,31 @@ interface ImageState {
   conversionOptions: ConversionOptions;
   progress: ConversionProgress;
   convertedImageUrl: string | null;
-  convertedMetadata: { width: number; height: number; size: number } | null;
+  convertedMetadata: ConvertedMetadata | null;
   error: string | null;
 
   setSelectedFile: (file: File | null) => void;
   setConversionOptions: (options: Partial<ConversionOptions>) => void;
   setProgress: (progress: Partial<ConversionProgress>) => void;
   setConvertedImageUrl: (url: string | null) => void;
-  setConvertedMetadata: (
-    metadata: { width: number; height: number; size: number } | null
-  ) => void;
+  setConvertedMetadata: (metadata: ConvertedMetadata | null) => void;
   setError: (error: string | null) => void;
   reset: () => void;
 }
 
-const initialState = {
+const initialState: Omit<
+  ImageState,
+  keyof Pick<
+    ImageState,
+    | 'setSelectedFile'
+    | 'setConversionOptions'
+    | 'setProgress'
+    | 'setConvertedImageUrl'
+    | 'setConvertedMetadata'
+    | 'setError'
+    | 'reset'
+  >
+> = {
   selectedFile: null,
   conversionOptions: {
     targetFormat: 'webp',
@@ -41,8 +56,11 @@ const initialState = {
   },
   progress: {
     isConverting: false,
-    progress: 0,
+    stage: 'idle',
+    percent: 0,
     message: '',
+    startedAt: null,
+    elapsedMs: 0,
   },
   convertedImageUrl: null,
   convertedMetadata: null,

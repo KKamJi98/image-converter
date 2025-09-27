@@ -1,5 +1,7 @@
-import axios from 'axios';
+import axios, { AxiosProgressEvent } from 'axios';
+
 import { ConversionOptions } from '../stores/imageStore';
+import type { ConversionStage, ConvertedImage } from '../types/conversion';
 
 const API_BASE_URL =
   process.env.REACT_APP_BACKEND_ENDPOINT ||
@@ -16,16 +18,49 @@ export const apiClient = axios.create({
   timeout: 90000, // 90초 타임아웃
 });
 
-export interface ConvertedImage {
-  blob: Blob;
-  size: number;
-  width: number;
-  height: number;
+export interface ConvertImageCallbacks {
+  onStageChange?: (stage: ConversionStage) => void;
+  onUploadProgress?: (ratio: number) => void;
+  onDownloadProgress?: (ratio: number) => void;
 }
+
+const toNumber = (value: string | string[] | undefined): number | undefined => {
+  if (Array.isArray(value)) {
+    return toNumber(value[0]);
+  }
+  if (!value) {
+    return undefined;
+  }
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
+
+const toFloat = (value: string | string[] | undefined): number | undefined => {
+  if (Array.isArray(value)) {
+    return toFloat(value[0]);
+  }
+  if (!value) {
+    return undefined;
+  }
+  const parsed = parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
+
+const progressRatio = (
+  event: AxiosProgressEvent,
+  fallbackTotal?: number
+): number => {
+  const total = event.total ?? fallbackTotal;
+  if (!total || total <= 0) {
+    return event.loaded > 0 ? 1 : 0;
+  }
+  return Math.min(1, event.loaded / total);
+};
 
 export const convertImage = async (
   file: File,
-  options: ConversionOptions
+  options: ConversionOptions,
+  callbacks?: ConvertImageCallbacks
 ): Promise<ConvertedImage> => {
   const formData = new FormData();
   formData.append('file', file);
@@ -48,27 +83,79 @@ export const convertImage = async (
   }
 
   try {
+    callbacks?.onStageChange?.('upload');
+
+    let processingNotified = false;
+    let downloadNotified = false;
+
+    const markProcessing = () => {
+      if (!processingNotified) {
+        callbacks?.onStageChange?.('processing');
+        processingNotified = true;
+      }
+    };
+
+    const markDownload = () => {
+      if (!downloadNotified) {
+        callbacks?.onStageChange?.('download');
+        downloadNotified = true;
+      }
+    };
+
     const response = await apiClient.post('/v1/convert', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
       responseType: 'blob',
+      onUploadProgress: (event) => {
+        const ratio = progressRatio(event, file.size);
+        callbacks?.onUploadProgress?.(ratio);
+        if (ratio >= 1) {
+          markProcessing();
+        }
+      },
+      onDownloadProgress: (event) => {
+        markDownload();
+        const ratio = progressRatio(event);
+        callbacks?.onDownloadProgress?.(ratio);
+      },
     });
 
-    const blob = response.data;
-    const size = blob.size;
+    markProcessing();
+    callbacks?.onUploadProgress?.(1);
+    markDownload();
+    callbacks?.onDownloadProgress?.(1);
+    callbacks?.onStageChange?.('finalizing');
 
-    const img = await new Promise<HTMLImageElement>((resolve) => {
-      const url = URL.createObjectURL(blob);
-      const image = new Image();
-      image.onload = () => {
-        resolve(image);
-        URL.revokeObjectURL(url);
-      };
-      image.src = url;
-    });
+    const blob: Blob = response.data;
+    const headers = response.headers as Record<string, string | undefined>;
 
-    return { blob, size, width: img.width, height: img.height };
+    const originalSize = toNumber(headers['x-original-size']) ?? file.size;
+    const convertedSize = toNumber(headers['x-converted-size']) ?? blob.size;
+    const compressionRatio =
+      toFloat(headers['x-compression-ratio']) ??
+      (originalSize > 0 ? convertedSize / originalSize : 1);
+
+    const width = toNumber(headers['x-converted-width']) ?? 0;
+    const height = toNumber(headers['x-converted-height']) ?? 0;
+    const originalWidth = toNumber(headers['x-original-width']) ?? width;
+    const originalHeight = toNumber(headers['x-original-height']) ?? height;
+    const processTimeSeconds = toFloat(headers['x-process-time']) ?? 0;
+    const targetFormat =
+      headers['x-target-format']?.toLowerCase() || options.targetFormat;
+
+    return {
+      blob,
+      size: convertedSize,
+      width,
+      height,
+      originalWidth,
+      originalHeight,
+      originalSize,
+      compressionRatio,
+      processTimeSeconds,
+      targetFormat,
+    };
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error('Image conversion failed:', {

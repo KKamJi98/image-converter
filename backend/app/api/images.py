@@ -12,7 +12,7 @@ from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 from PIL import Image
 
-from app.models.image_models import ConversionRequest, ConversionResponse
+from app.models.image_models import ConversionRequest
 from app.services.image_converter import ImageConverter
 
 logger = logging.getLogger(__name__)
@@ -21,7 +21,20 @@ router = APIRouter()
 converter = ImageConverter()
 
 
-@router.post("/convert", response_model=ConversionResponse)
+METADATA_HEADERS = {
+    "X-Original-Size",
+    "X-Converted-Size",
+    "X-Compression-Ratio",
+    "X-Original-Width",
+    "X-Original-Height",
+    "X-Converted-Width",
+    "X-Converted-Height",
+    "X-Process-Time",
+    "X-Target-Format",
+}
+
+
+@router.post("/convert")
 async def convert_image(
     file: UploadFile = File(...),
     target_format: str = Form(...),
@@ -83,15 +96,26 @@ async def convert_image(
         )
 
         # 변환된 이미지를 스트림으로 반환
+        width_before, height_before = metadata.original_dimensions
+        width_after, height_after = metadata.converted_dimensions
+
+        response_headers = {
+            "Content-Disposition": f"attachment; filename=converted.{target_format}",
+            "X-Original-Size": str(metadata.original_size),
+            "X-Converted-Size": str(metadata.converted_size),
+            "X-Compression-Ratio": f"{metadata.compression_ratio:.6f}",
+            "X-Original-Width": str(width_before),
+            "X-Original-Height": str(height_before),
+            "X-Converted-Width": str(width_after),
+            "X-Converted-Height": str(height_after),
+            "X-Process-Time": f"{duration:.3f}",
+            "X-Target-Format": metadata.converted_format,
+        }
+
         return StreamingResponse(
             io.BytesIO(converted_data),
             media_type=f"image/{target_format}",
-            headers={
-                "Content-Disposition": f"attachment; filename=converted.{target_format}",
-                "X-Original-Size": str(metadata.original_size),
-                "X-Converted-Size": str(metadata.converted_size),
-                "X-Compression-Ratio": str(metadata.compression_ratio),
-            },
+            headers=response_headers,
         )
 
     except Exception as e:

@@ -26,6 +26,12 @@ describe('imageService', () => {
         size: mockBlob.size,
         width: 50,
         height: 50,
+        originalWidth: 100,
+        originalHeight: 100,
+        originalSize: mockBlob.size * 2,
+        compressionRatio: 0.5,
+        processTimeSeconds: 1.5,
+        targetFormat: 'webp',
       });
 
       const file = new File(['test'], 'test.png', { type: 'image/png' });
@@ -45,6 +51,12 @@ describe('imageService', () => {
         size: mockBlob.size,
         width: 50,
         height: 50,
+        originalWidth: 100,
+        originalHeight: 100,
+        originalSize: mockBlob.size * 2,
+        compressionRatio: 0.5,
+        processTimeSeconds: 1.5,
+        targetFormat: 'webp',
       });
     });
 

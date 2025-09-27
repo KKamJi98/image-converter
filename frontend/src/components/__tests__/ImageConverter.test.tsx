@@ -36,8 +36,11 @@ jest.mock('../../stores/imageStore', () => ({
     },
     progress: {
       isConverting: false,
-      progress: 0,
+      stage: 'idle',
+      percent: 0,
       message: '',
+      startedAt: null,
+      elapsedMs: 0,
     },
     convertedImageUrl: null,
     error: null,
@@ -69,6 +72,12 @@ describe('ImageConverter', () => {
       size: mockBlob.size,
       width: 100,
       height: 50,
+      originalWidth: 100,
+      originalHeight: 50,
+      originalSize: mockBlob.size * 2,
+      compressionRatio: 0.5,
+      processTimeSeconds: 4.2,
+      targetFormat: 'webp',
     });
 
     render(<ImageConverter />);
@@ -85,8 +94,8 @@ describe('ImageConverter', () => {
       1,
       expect.objectContaining({
         isConverting: true,
-        progress: 0,
-        message: '변환 준비 중...',
+        stage: 'upload',
+        percent: 0,
       })
     );
 
@@ -99,6 +108,11 @@ describe('ImageConverter', () => {
           maxHeight: 1080,
           maxSizeMb: 1,
           quality: 100,
+        }),
+        expect.objectContaining({
+          onStageChange: expect.any(Function),
+          onUploadProgress: expect.any(Function),
+          onDownloadProgress: expect.any(Function),
         })
       );
     });
@@ -113,6 +127,12 @@ describe('ImageConverter', () => {
         width: 100,
         height: 50,
         size: mockBlob.size,
+        originalWidth: 100,
+        originalHeight: 50,
+        originalSize: mockBlob.size * 2,
+        compressionRatio: 0.5,
+        processTimeSeconds: 4.2,
+        targetFormat: 'webp',
       });
     });
 
@@ -126,8 +146,8 @@ describe('ImageConverter', () => {
       expect(mockSetProgress).toHaveBeenLastCalledWith(
         expect.objectContaining({
           isConverting: false,
-          progress: 100,
-          message: '변환이 완료되었습니다!',
+          stage: 'done',
+          percent: 100,
         })
       );
     });
@@ -151,8 +171,8 @@ describe('ImageConverter', () => {
       expect(mockSetProgress).toHaveBeenLastCalledWith(
         expect.objectContaining({
           isConverting: false,
-          progress: 0,
-          message: '',
+          stage: 'idle',
+          percent: 0,
         })
       );
     });

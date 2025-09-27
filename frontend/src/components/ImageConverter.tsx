@@ -5,7 +5,36 @@ import { ConversionProgress } from './ConversionProgress';
 import { ConversionResult } from './ConversionResult';
 import { useImageStore } from '../stores/imageStore';
 import { convertImage } from '../services/imageService';
+import type { ConversionStage } from '../types/conversion';
 import './ImageConverter.css';
+
+const STAGE_SEGMENTS: Record<ConversionStage, { base: number; span: number }> =
+  {
+    idle: { base: 0, span: 0 },
+    upload: { base: 0, span: 30 },
+    processing: { base: 30, span: 30 },
+    download: { base: 60, span: 30 },
+    finalizing: { base: 90, span: 9 },
+    done: { base: 99, span: 1 },
+  };
+
+const STAGE_MESSAGES: Record<ConversionStage, string> = {
+  idle: '',
+  upload: '이미지를 업로드하는 중입니다... (브라우저 → 서버)',
+  processing: '서버에서 이미지를 변환하는 중입니다...',
+  download: '변환된 이미지를 내려받는 중입니다... (서버 → 브라우저)',
+  finalizing: '결과를 정리하고 있습니다...',
+  done: '변환이 완료되었습니다! 🎉',
+};
+
+const stagePercent = (stage: ConversionStage, ratio = 1): number => {
+  const segment = STAGE_SEGMENTS[stage];
+  if (!segment) {
+    return 0;
+  }
+  const value = segment.base + segment.span * ratio;
+  return Math.min(100, Math.max(0, Math.round(value)));
+};
 
 export const ImageConverter: React.FC = () => {
   const {
@@ -23,41 +52,57 @@ export const ImageConverter: React.FC = () => {
   const handleConvert = async () => {
     if (!selectedFile) return;
 
+    if (convertedImageUrl) {
+      URL.revokeObjectURL(convertedImageUrl);
+      setConvertedImageUrl(null);
+    }
+    setConvertedMetadata(null);
     setError(null);
-    setProgress({
-      isConverting: true,
-      progress: 0,
-      message: '변환 준비 중...',
-    });
+    const startedAt = performance.now();
 
-    let progressInterval: NodeJS.Timeout | null = null;
-
-    const startProgressAnimation = (
-      start: number,
-      end: number,
-      duration = 2000
+    const updateStage = (
+      stage: ConversionStage,
+      ratio = stage === 'processing' ? 0.4 : 1,
+      overrideMessage?: string
     ) => {
-      const step = (end - start) / (duration / 100);
-      let current = start;
-      progressInterval = setInterval(() => {
-        current += step;
-        setProgress({ progress: Math.min(end, Math.round(current)) });
-        if (current >= end) {
-          if (progressInterval) clearInterval(progressInterval);
-        }
-      }, 100);
+      const elapsedMs = performance.now() - startedAt;
+      setProgress({
+        stage,
+        percent: stagePercent(stage, ratio),
+        message: overrideMessage ?? STAGE_MESSAGES[stage],
+        elapsedMs,
+      });
     };
 
+    setProgress({
+      isConverting: true,
+      stage: 'upload',
+      percent: 0,
+      message: STAGE_MESSAGES.upload,
+      startedAt,
+      elapsedMs: 0,
+    });
+
     try {
-      setProgress({ progress: 25, message: '이미지 업로드 중...' });
-      startProgressAnimation(25, 90, 3000);
+      const result = await convertImage(selectedFile, conversionOptions, {
+        onStageChange: (stage) => {
+          if (stage === 'processing') {
+            updateStage(stage, 0.25);
+          } else if (stage === 'download') {
+            updateStage(stage, 0.05);
+          } else {
+            updateStage(stage);
+          }
+        },
+        onUploadProgress: (ratio) => {
+          updateStage('upload', ratio);
+        },
+        onDownloadProgress: (ratio) => {
+          updateStage('download', ratio > 0 ? ratio : 0.05);
+        },
+      });
 
-      const result = await convertImage(selectedFile, conversionOptions);
-
-      if (progressInterval) {
-        clearInterval(progressInterval);
-      }
-      setProgress({ progress: 90, message: '변환 완료 처리 중...' });
+      updateStage('finalizing');
 
       // Blob URL 생성
       const url = URL.createObjectURL(result.blob);
@@ -66,21 +111,33 @@ export const ImageConverter: React.FC = () => {
         width: result.width,
         height: result.height,
         size: result.size,
+        originalWidth: result.originalWidth,
+        originalHeight: result.originalHeight,
+        originalSize: result.originalSize,
+        compressionRatio: result.compressionRatio,
+        processTimeSeconds: result.processTimeSeconds,
+        targetFormat: result.targetFormat,
       });
 
       setProgress({
         isConverting: false,
-        progress: 100,
-        message: '변환이 완료되었습니다!',
+        stage: 'done',
+        percent: 100,
+        message: STAGE_MESSAGES.done,
+        elapsedMs: performance.now() - startedAt,
       });
     } catch (err) {
-      if (progressInterval) {
-        clearInterval(progressInterval);
-      }
       setError(
         err instanceof Error ? err.message : '변환 중 오류가 발생했습니다.'
       );
-      setProgress({ isConverting: false, progress: 0, message: '' });
+      setProgress({
+        isConverting: false,
+        stage: 'idle',
+        percent: 0,
+        message: '',
+        startedAt: null,
+        elapsedMs: 0,
+      });
     }
   };
 

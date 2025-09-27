@@ -7,8 +7,11 @@ jest.mock('../../stores/imageStore', () => ({
   useImageStore: () => ({
     progress: {
       isConverting: true,
-      progress: 50,
+      stage: 'download',
+      percent: 50,
       message: '변환 중...',
+      startedAt: 0,
+      elapsedMs: 2000,
     },
   }),
 }));
@@ -39,6 +42,13 @@ describe('ConversionProgress', () => {
     render(<ConversionProgress />);
 
     const progressFill = screen.getByTestId('progress-fill');
-    expect(progressFill).toHaveStyle('width: 50%');
+    expect(progressFill).toHaveStyle({ width: '50%' });
+  });
+
+  test('renders current stage subtitle', () => {
+    render(<ConversionProgress />);
+
+    const subtitle = screen.getByText(/현재 단계/i);
+    expect(subtitle).toBeInTheDocument();
   });
 });

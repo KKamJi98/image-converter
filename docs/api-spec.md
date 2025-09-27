@@ -105,10 +105,19 @@ const blob = await response.blob();
 - **Body**: 변환된 이미지 바이너리 데이터
 
 **응답 헤더**
-- `Content-Disposition`: `attachment; filename=converted.{format}`
-- `X-Original-Size`: 원본 파일 크기 (bytes)
-- `X-Converted-Size`: 변환된 파일 크기 (bytes)
-- `X-Compression-Ratio`: 압축률 (0.0-1.0)
+
+| 헤더 | 설명 |
+| --- | --- |
+| `Content-Disposition` | `attachment; filename=converted.{format}` |
+| `X-Target-Format` | 변환된 결과 형식(소문자) |
+| `X-Original-Size` | 원본 파일 크기 (bytes) |
+| `X-Converted-Size` | 변환된 파일 크기 (bytes) |
+| `X-Compression-Ratio` | 압축률 (`converted / original`) |
+| `X-Original-Width`, `X-Original-Height` | 원본 해상도 (px) |
+| `X-Converted-Width`, `X-Converted-Height` | 변환된 해상도 (px) |
+| `X-Process-Time` | 서버 처리 시간 (초, 소수점 3자리) |
+
+> NOTE: CORS 환경에서 프런트엔드가 위 메타데이터를 접근할 수 있도록 `Access-Control-Expose-Headers`에 위 헤더가 모두 포함됩니다.
 
 **상태 코드**
 - `200 OK`: 변환 성공
