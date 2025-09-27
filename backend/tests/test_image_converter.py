@@ -76,9 +76,7 @@ async def test_webp_lossless_conversion(converter, sample_image_data):
 
     request = ConversionRequest(target_format="webp", quality=100)
 
-    converted_data, metadata = await converter.convert_image(
-        sample_image_data, request
-    )
+    converted_data, metadata = await converter.convert_image(sample_image_data, request)
 
     original_image = Image.open(io.BytesIO(sample_image_data)).convert("RGBA")
     converted_image = Image.open(io.BytesIO(converted_data)).convert("RGBA")

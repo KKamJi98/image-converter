@@ -217,10 +217,12 @@ class ImageConverter:
                 "Q": quality,
             }
             if lossless_requested:
-                params.update({
-                    "lossless": True,
-                    "Q": 100,
-                })
+                params.update(
+                    {
+                        "lossless": True,
+                        "Q": 100,
+                    }
+                )
             return img.write_to_buffer(
                 ".webp",
                 **params,
@@ -370,10 +372,12 @@ class ImageConverter:
                 "method": 4,
             }
             if lossless_requested:
-                webp_kwargs.update({
-                    "lossless": True,
-                    "quality": 100,
-                })
+                webp_kwargs.update(
+                    {
+                        "lossless": True,
+                        "quality": 100,
+                    }
+                )
             save_kwargs.update(webp_kwargs)
         elif request.target_format == "png":
             save_kwargs.update(
