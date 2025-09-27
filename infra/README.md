@@ -178,7 +178,7 @@ autoscaling:
     enabled: true
     minReplicas: 2                    # 최소 복제본
     maxReplicas: 10                   # 최대 복제본
-    targetCPUUtilizationPercentage: 70
+    targetCPUUtilizationPercentage: 80
     targetMemoryUtilizationPercentage: 80
     behavior:                         # HPA 동작 커스터마이징 (선택 사항)
       scaleUp:
@@ -206,7 +206,7 @@ autoscaling:
     enabled: true
     minReplicas: 2
     maxReplicas: 5
-    targetCPUUtilizationPercentage: 70
+    targetCPUUtilizationPercentage: 80
     behavior: {}                      # 필요 시 backend와 동일하게 정의
 ```
 

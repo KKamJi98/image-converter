@@ -82,7 +82,7 @@ autoscaling:
     enabled: true
     minReplicas: 2
     maxReplicas: 3
-    targetCPUUtilizationPercentage: 70
+    targetCPUUtilizationPercentage: 80
     targetMemoryUtilizationPercentage: 80
     behavior:
       scaleUp:
@@ -109,7 +109,7 @@ autoscaling:
     enabled: true
     minReplicas: 2
     maxReplicas: 3
-    targetCPUUtilizationPercentage: 70
+    targetCPUUtilizationPercentage: 80
     behavior:
       scaleUp:
         stabilizationWindowSeconds: 180
