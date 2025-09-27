@@ -31,6 +31,7 @@ backend:
   # Optional tmpfs mount for /tmp to enable O_TMPFILE and speed up temp I/O
   tmpfs:
     enabled: false
+    # medium: Memory   # Memory=tmpfs, unset for node disk (ext4/xfs)
     # sizeLimit: 1Gi
 
   healthcheck:

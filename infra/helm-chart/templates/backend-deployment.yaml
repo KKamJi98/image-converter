@@ -60,7 +60,9 @@ spec:
       volumes:
         - name: tmp
           emptyDir:
-            medium: Memory
+            {{- with .Values.backend.tmpfs.medium }}
+            medium: {{ . }}
+            {{- end }}
             {{- with .Values.backend.tmpfs.sizeLimit }}
             sizeLimit: {{ . }}
             {{- end }}
