@@ -34,6 +34,19 @@
 - `AGENTS.md`: 규칙 및 CI 요구사항 정리(기존 GEMINI.md를 개명).
 - `.gitignore`: `AGENTS.md` 추가.
 
+---
+
+## CI 이슈 기록: isort 실패(Import ordering)
+
+- 증상: GitHub Actions에서 `isort --check-only`가 `backend/app/main.py`, `backend/app/services/image_converter.py`의 import 정렬 오류로 실패.
+- 원인:
+  - `main.py`: 써드파티(FastAPI)와 퍼스트파티(`app.api`) import 사이에 공백 라인이 없어 그룹 구분 규칙(profile=black) 미준수.
+  - `services/image_converter.py`: `from PIL import Image, ImageOps, ImageFile`의 import 이름 순서가 알파벳 기준 정렬 규칙과 불일치.
+- 조치:
+  - `main.py`: 써드파티와 퍼스트파티 import 사이에 공백 라인 추가, 모든 import를 모듈 상단으로 정리.
+  - `services/image_converter.py`: `from PIL import Image, ImageFile, ImageOps`로 정렬 수정 및 import 그룹 정리.
+- 결과: 로컬/CI에서 `isort --check-only` 및 `black --check` 통과 확인. 기능 변경 없음(스타일 수정).
+
 ## 추가 메모
 
 - CI 파이프라인은 기존 구조를 유지하되, Helm values 자동 갱신 단계가 포함되어 있습니다. 태그 전략은 Harbor 리포지토리별 동일 태그(`YYYYMMDD-<hash>`)를 사용하며, 리포지토리 분리(`backend/`, `frontend/`)로 충돌을 피합니다.
