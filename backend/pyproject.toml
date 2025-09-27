@@ -8,21 +8,21 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "fastapi>=0.104.1",
-    "uvicorn[standard]>=0.24.0",
-    "pillow>=11.2.0",
-    "python-multipart>=0.0.6",
-    "pydantic>=2.11.7",
-    "httpx>=0.25.2",
+    "fastapi>=0.117.1",
+    "uvicorn[standard]>=0.37.0",
+    "pillow>=11.3.0",
+    "python-multipart>=0.0.20",
+    "pydantic>=2.11.9",
+    "httpx>=0.28.1",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=7.4.3",
-    "pytest-asyncio>=0.21.1",
-    "black>=23.11.0",
-    "isort>=5.12.0",
-    "httpx>=0.25.2",
+    "pytest>=8.4.2",
+    "pytest-asyncio>=1.2.0",
+    "black>=25.9.0",
+    "isort>=6.0.1",
+    "httpx>=0.28.1",
 ]
 
 [build-system]
