@@ -21,8 +21,9 @@ def sample_image_data():
 
 
 @pytest.fixture
-def converter():
+def converter(monkeypatch):
     """이미지 변환기 인스턴스"""
+    monkeypatch.setenv("USE_VIPS", "0")
     return ImageConverter()
 
 
@@ -67,3 +68,21 @@ async def test_quality_conversion(converter, sample_image_data):
 
     # 낮은 품질이 더 작은 파일 크기를 가져야 함
     assert low_meta.converted_size < high_meta.converted_size
+
+
+@pytest.mark.asyncio
+async def test_webp_lossless_conversion(converter, sample_image_data):
+    """품질 100%일 때 WebP 무손실 변환"""
+
+    request = ConversionRequest(target_format="webp", quality=100)
+
+    converted_data, metadata = await converter.convert_image(
+        sample_image_data, request
+    )
+
+    original_image = Image.open(io.BytesIO(sample_image_data)).convert("RGBA")
+    converted_image = Image.open(io.BytesIO(converted_data)).convert("RGBA")
+
+    assert converted_image.size == original_image.size
+    assert list(converted_image.getdata()) == list(original_image.getdata())
+    assert metadata.converted_format == "webp"

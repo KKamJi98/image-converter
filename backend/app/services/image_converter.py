@@ -204,6 +204,8 @@ class ImageConverter:
     def _encode_vips(self, img: "pyvips.Image", request: ConversionRequest) -> bytes:
         fmt = request.target_format
         quality = int(request.quality or 100)
+        lossless_requested = (request.quality or 100) >= 100
+
         if fmt in {"jpeg", "jpg"}:
             return img.write_to_buffer(
                 ".jpg",
@@ -211,9 +213,17 @@ class ImageConverter:
                 interlace=True,  # progressive
             )
         elif fmt == "webp":
+            params = {
+                "Q": quality,
+            }
+            if lossless_requested:
+                params.update({
+                    "lossless": True,
+                    "Q": 100,
+                })
             return img.write_to_buffer(
                 ".webp",
-                Q=quality,
+                **params,
             )
         elif fmt == "png":
             return img.write_to_buffer(
@@ -342,6 +352,8 @@ class ImageConverter:
         )
         save_kwargs = {"format": format_name}
 
+        lossless_requested = (request.quality or 100) >= 100
+
         if request.target_format in ["jpeg", "jpg"]:
             save_kwargs.update(
                 {
@@ -352,13 +364,17 @@ class ImageConverter:
                 }
             )
         elif request.target_format == "webp":
-            save_kwargs.update(
-                {
-                    "quality": request.quality,
-                    "optimize": True,
-                    "method": 4,
-                }
-            )
+            webp_kwargs = {
+                "quality": request.quality,
+                "optimize": True,
+                "method": 4,
+            }
+            if lossless_requested:
+                webp_kwargs.update({
+                    "lossless": True,
+                    "quality": 100,
+                })
+            save_kwargs.update(webp_kwargs)
         elif request.target_format == "png":
             save_kwargs.update(
                 {

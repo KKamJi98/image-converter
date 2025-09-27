@@ -80,10 +80,8 @@ export const ConversionProgress: React.FC = () => {
   const stageIndex = TIMELINE.indexOf(progress.stage);
   const elapsedSeconds = displayElapsedMs / 1000;
   const elapsedSecondsLabel = React.useMemo(() => {
-    return elapsedSeconds.toLocaleString('ko-KR', {
-      minimumFractionDigits: 1,
-      maximumFractionDigits: 1,
-    });
+    const integerSeconds = Math.max(0, Math.floor(elapsedSeconds));
+    return integerSeconds.toLocaleString('ko-KR');
   }, [elapsedSeconds]);
 
   return (
