@@ -8,12 +8,12 @@ backend:
     repository: image-converter/backend
     tag: "backend-20250927-1928a6"
     pullPolicy: Always
-  replicaCount: 2
+  replicaCount: 1
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 50%
-      maxUnavailable: 33%
+      maxSurge: 1
+      maxUnavailable: 0
   service:
     type: ClusterIP
     port: 8000
@@ -45,12 +45,12 @@ frontend:
     repository: image-converter/frontend
     tag: "frontend-20250927-1928a6"
     pullPolicy: Always
-  replicaCount: 2
+  replicaCount: 1
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 50%
-      maxUnavailable: 33%
+      maxSurge: 1
+      maxUnavailable: 0
   service:
     type: ClusterIP
     port: 80
@@ -95,7 +95,7 @@ ingress:
 autoscaling:
   backend:
     enabled: true
-    minReplicas: 2
+    minReplicas: 1
     maxReplicas: 3
     targetCPUUtilizationPercentage: 80
     targetMemoryUtilizationPercentage: 80
@@ -122,7 +122,7 @@ autoscaling:
             periodSeconds: 60
   frontend:
     enabled: true
-    minReplicas: 2
+    minReplicas: 1
     maxReplicas: 3
     targetCPUUtilizationPercentage: 80
     behavior:
