@@ -22,14 +22,6 @@ backend:
     port: 8000
     targetPort: 8000
 
-  resources:
-    limits:
-      cpu: 500m
-      memory: 512Mi
-    requests:
-      cpu: 250m
-      memory: 256Mi
-
   env:
     - name: PYTHONPATH
       value: "/app"
@@ -67,14 +59,6 @@ frontend:
     port: 80
     targetPort: 80
 
-  resources:
-    limits:
-      cpu: 200m
-      memory: 256Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
-
   env:
     - name: REACT_APP_API_URL
       value: "/api"
@@ -109,48 +93,10 @@ ingress:
 
 autoscaling:
   backend:
-    enabled: true
-    minReplicas: 2
-    maxReplicas: 10
-    targetCPUUtilizationPercentage: 80
-    targetMemoryUtilizationPercentage: 80
-    behavior: {}
-    #   scaleUp:
-    #     stabilizationWindowSeconds: 180
-    #     selectPolicy: Max
-    #     policies:
-    #       - type: Percent
-    #         value: 100
-    #         periodSeconds: 60
-    #       - type: Pods
-    #         value: 2
-    #         periodSeconds: 60
-    #   scaleDown:
-    #     stabilizationWindowSeconds: 180
-    #     selectPolicy: Max
-    #     policies:
-    #       - type: Percent
-    #         value: 50
-    #         periodSeconds: 60
+    enabled: false
 
   frontend:
-    enabled: true
-    minReplicas: 2
-    maxReplicas: 5
-    targetCPUUtilizationPercentage: 80
-    behavior: {}
-    #   scaleUp:
-    #     stabilizationWindowSeconds: 180
-    #     policies:
-    #       - type: Percent
-    #         value: 100
-    #         periodSeconds: 60
-    #   scaleDown:
-    #     stabilizationWindowSeconds: 180
-    #     policies:
-    #       - type: Percent
-    #         value: 50
-    #         periodSeconds: 60
+    enabled: false
 
 podDisruptionBudget:
   enabled: true
