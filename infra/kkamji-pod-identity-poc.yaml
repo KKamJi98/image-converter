@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: aws-cli
+  namespace: default
+spec:
+  containers:
+  - name: demo
+    image: amazon/aws-cli:latest
+    command: ["sleep", "3600"]
